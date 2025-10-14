@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Public Interview{% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/public_interview.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Page Header -->
+    <div class="row mb-4 brand-header py-5 rounded">
+      <div class="col">
+        <h1 class="h3">Public Interviews</h1>
+        <p>Manage and view all your created public interviews</p>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" class="form-control" id="searchInput"
+            placeholder="Search interviews by title or description...">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex gap-2">
+          <div class="filter-dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-filter me-2"></i>Filter
+            </button>
+            <div class="dropdown-menu">
+              <div class="mb-2">
+                <label class="form-label fw-bold">Status</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="open" id="filterOpen" checked>
+                  <label class="form-check-label" for="filterOpen">Open</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="closed" id="filterClosed" checked>
+                  <label class="form-check-label" for="filterClosed">Closed</label>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-bold">Category</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Technical" id="filterTechnical" checked>
+                  <label class="form-check-label" for="filterTechnical">Technical</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Behavioral" id="filterBehavioral" checked>
+                  <label class="form-check-label" for="filterBehavioral">Behavioral</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Management" id="filterManagement" checked>
+                  <label class="form-check-label" for="filterManagement">Management</label>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary-custom w-100 mt-2" id="applyFilters">Apply Filters</button>
+            </div>
+          </div>
+          <button class="btn btn-outline-secondary" id="sortButton">
+            <i class="fas fa-sort me-2"></i>Sort
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interviews List -->
+    <div id="interviewsList">
+      <!-- Interviews will be loaded here dynamically -->
+      <div class="row">
+        <div class="col-12">
+          {% for interview in interviews %}
+          <div class="card card-custom interview-card">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <div class="d-flex align-items-center mb-2">
+                    <h5 class="card-title mb-0 me-3">{{interview.title}}</h5>
+                    <span class="status-badge status-open">{{"Open" if interview.status==True else "Close"}}</span>
+                  </div>
+                  <p class="card-text text-muted mb-2">{{interview.description | truncate(30)}}</p>
+                  <div class="d-flex align-items-center">
+                    <span class="category-badge me-2">{{interview.category}}</span>
+                    <small class="text-muted me-3">
+                      <i class="fas fa-question-circle me-1"></i>{{interview.questions|length}} questions
+                    </small>
+                    <small class="text-muted">
+                      <i class="fas fa-clock me-1"></i>Created {{ interview.created_at.strftime("%b %d, %Y") }}
+                    </small>
+                  </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                  <div class="action-buttons mt-3 mt-md-0">
+                    <a href="{{ url_for ('public_interview_detail', interview_id=interview.id) }}"
+                      class="btn btn-outline-primary-custom btn-sm">
+                      <i class="fas fa-eye me-1"></i>View
+                    </a>
+                    <button class="btn btn-outline-secondary btn-sm start-interview-btn"
+                      data-interview-id="{{ interview.id }}" {% if interview.id in attempted_ids or not interview.status
+                      %} disabled {% endif %}>
+                      {% if interview.id in attempted_ids %}
+                      <i class="fas fa-check me-1"></i>Already Interviewed
+                      {% elif not interview.status %}
+                      <i class="fas fa-times me-1"></i>Closed
+                      {% else %}
+                      <i class="fas fa-play me-1"></i>Start Interview
+                      {% endif %}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State (hidden by default) -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <i class="fas fa-clipboard-list"></i>
+      <h4>No interviews found</h4>
+      <p class="text-muted">Try adjusting your search or filters, or create a new interview.</p>
+
+      <a href="/create-public-interview" class="btn btn-primary-custom mt-3">
+        <i class="fas fa-plus me-2"></i>Create Your First Interview
+      </a>
+    </div>
+  </div>
+
+  <!-- Resume Upload Modal -->
+  <div class="modal fade" id="resumeUploadModal" tabindex="-1" aria-labelledby="resumeUploadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-3">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="resumeUploadLabel">
+            Upload Your Resume to Begin Interview
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="resumeUploadForm" enctype="multipart/form-data">
+            <input type="hidden" id="selectedInterviewId" name="interview_id">
+            <div class="mb-3">
+              <label for="resumeFile" class="form-label fw-bold">Choose Resume File (PDF, DOCX)</label>
+              <input type="file" class="form-control" id="resumeFile" name="resume" accept=".pdf,.doc,.docx" required>
+            </div>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary-custom w-100">
+                <i class="fas fa-upload me-2"></i>Upload & Start Interview
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/public_interview.js') }}"></script>
+{% endblock %}

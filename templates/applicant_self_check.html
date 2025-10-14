@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+
+{% block title %} Review Applicant {% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/applicant_self_check.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <header class="brand-header py-5 rounded mb-4">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                <div>
+                    <h1 class="h3 mb-1">Resume Fit Checker</h1>
+                    <p class="mb-0 opacity-75">Find the right job, upload your resume, and get instant AI fit
+                        analysis.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container pb-5">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div id="step-1" class="step active"><span class="circle">1</span><span>Search Jobs</span></div>
+                    <span class="text-secondary">—</span>
+                    <div id="step-2" class="step"><span class="circle">2</span><span>Select Job</span></div>
+                    <span class="text-secondary">—</span>
+                    <div id="step-3" class="step"><span class="circle">3</span><span>Upload Resume</span></div>
+                    <span class="text-secondary">—</span>
+                    <div id="step-4" class="step"><span class="circle">4</span><span>View Assessment</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h2 class="h5 mb-0">Step 1 — Enter job details</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="source" class="form-label">Source</label>
+                                <select id="source" class="form-select" name="jobSource" required>
+                                    <option value="linkedin" name="jobSource" selected>LinkedIn</option>
+                                    <option value="rozee.pk" name="jobSource">Rozee.pk</option>
+                                    <option value="manual" name="jobSource">User Posted</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="title" class="form-label">Job Title</label>
+                                <input id="title" class="form-control" type="text" placeholder="e.g., Project Manager" name="job_title" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="location" class="form-label">Location</label>
+                                <input id="location" class="form-control" type="text" placeholder="e.g., Karachi" name="location" />
+                            </div>
+                            <div class="col-md-8 d-flex align-items-end justify-content-md-end">
+                                <button type="submit" class="btn brand-btn px-4">Find jobs</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultsSection" class="col-12 hidden">
+                <div class="card">
+                    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                        <h2 class="h5 mb-0">Step 2 — Select a job</h2>
+                        <div class="text-secondary small" id="resultsMeta"></div>
+                    </div>
+                    <div class="card-body">
+                        <div id="jobList" class="list-group"></div>
+                        <div class="d-flex align-items-center justify-content-between mt-3">
+                            <div class="small text-secondary">Showing <span id="shownCount">0</span> of <span
+                                    id="totalCount">0</span> jobs</div>
+                            <button id="toResumeBtn" class="btn brand-btn" disabled>Continue to Upload
+                                Resume</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resumeSection" class="col-12 hidden">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h2 class="h5 mb-0">Step 3 — Upload your resume</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-8">
+                                <div class="p-4 border-dashed rounded-3 bg-light">
+                                    <label for="resumeFile" class="form-label fw-semibold">Resume
+                                        (PDF/DOC/DOCX)</label>
+                                    <input id="resumeFile" class="form-control" type="file" accept=".pdf,.doc,.docx" name="resume"/>
+                                    <div class="form-text">Make sure your resume includes relevant achievements and
+                                        skills.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end justify-content-md-end">
+                                <button id="analyzeBtn" class="btn brand-btn px-4" disabled>Analyze fit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="assessmentSection" class="col-12 hidden">
+                <div class="card">
+                    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                        <h2 class="h5 mb-0">Step 4 — AI Assessment</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-lg-4">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="text-secondary small">Match Score</div>
+                                            <div id="matchScoreText" class="display-6 fw-bold">0%</div>
+                                        </div>
+                                        <div style="min-width: 120px">
+                                            <div class="progress" role="progressbar" aria-label="Match score"
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                <div id="matchProgress" class="progress-bar bg-info" style="width: 0%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <div class="text-secondary small mb-2">Overview</div>
+                                    <p id="overviewText" class="mb-0"></p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <h3 class="h6 mb-2">Strengths</h3>
+                                    <ul id="strengthsList" class="mb-0 ps-4 list-check"></ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <h3 class="h6 mb-2">Improvement Areas</h3>
+                                    <ul id="improvementsList" class="mb-0 ps-4 list-x"></ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <h3 class="h6 mb-2">Missing Requirements</h3>
+                                    <ul id="missingReqsList" class="mb-0 ps-4 list-x"></ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <h3 class="h6 mb-2">Actionable Advice</h3>
+                                    <ul id="adviceList" class="mb-0 ps-4 list-check"></ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-white border h-100">
+                                    <h3 class="h6 mb-2">Resume Tips</h3>
+                                    <ul id="tipsList" class="mb-0 ps-4 list-check"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button id="restartBtn" class="btn btn-outline-secondary">Start over</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Utility: update stepper UI
+    function setStep(activeIndex) {
+        const steps = [
+            document.getElementById("step-1"),
+            document.getElementById("step-2"),
+            document.getElementById("step-3"),
+            document.getElementById("step-4"),
+        ];
+        steps.forEach((el, idx) => {
+            el.classList.remove("active", "completed");
+            if (idx < activeIndex) el.classList.add("completed");
+            if (idx === activeIndex) el.classList.add("active");
+        });
+    }
+
+    // Elements
+    const searchForm = document.getElementById("searchForm");
+    const resultsSection = document.getElementById("resultsSection");
+    const jobList = document.getElementById("jobList");
+    const shownCount = document.getElementById("shownCount");
+    const totalCount = document.getElementById("totalCount");
+    const resultsMeta = document.getElementById("resultsMeta");
+    const toResumeBtn = document.getElementById("toResumeBtn");
+
+    const resumeSection = document.getElementById("resumeSection");
+    const resumeFile = document.getElementById("resumeFile");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+
+    const assessmentSection = document.getElementById("assessmentSection");
+    const matchScoreText = document.getElementById("matchScoreText");
+    const matchProgress = document.getElementById("matchProgress");
+
+    const overviewText = document.getElementById("overviewText");
+
+    const strengthsList = document.getElementById("strengthsList");
+    const improvementsList = document.getElementById("improvementsList");
+    const keyMatchesList = document.getElementById("keyMatchesList");
+    const missingReqsList = document.getElementById("missingReqsList");
+    const adviceList = document.getElementById("adviceList");
+    const tipsList = document.getElementById("tipsList");
+    const restartBtn = document.getElementById("restartBtn");
+
+    let selectedJob = null;
+
+    // Step 1: Search jobs
+    searchForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStep(1); // highlight Step 2 as active next
+        selectedJob = null;
+        toResumeBtn.disabled = true;
+
+        // Collect criteria
+        const source = document.getElementById("source").value;
+        const title = document.getElementById("title").value.trim();
+        const location = document.getElementById("location").value.trim();
+
+        // TODO: Replace with your real search endpoint
+        // Example:
+        const params = new URLSearchParams({ source, title, location });
+        const res = await fetch(`/api/jobs/search?${params}`);
+        const jobs = await res.json();
+        // Simulated results:
+        const now = new Date().toISOString().slice(0, 10);
+        // const jobs = [
+        //     { id: "j1", title: title || "Project Manager", company: "BlueSky Tech", location: location || "Karachi", source, posted_on: now, link: "#" },
+        //     { id: "j2", title: title || "Project Manager", company: "Oceanic Systems", location: location || "Lahore", source, posted_on: now, link: "#" },
+        //     { id: "j3", title: title || "Project Manager", company: "Glacier Labs", location: location || "Islamabad", source, posted_on: now, link: "#" },
+        // ];
+
+        renderJobs(jobs, { source, title, location });
+        resultsSection.classList.remove("hidden");
+        resumeSection.classList.add("hidden");
+        assessmentSection.classList.add("hidden");
+    });
+
+    function renderJobs(jobs, meta) {
+        jobList.innerHTML = "";
+        jobs.forEach((job) => {
+            const item = document.createElement("label");
+            item.className = "list-group-item list-group-item-action d-flex gap-3 align-items-start";
+            item.innerHTML = `
+          <input class="form-check-input mt-1" type="radio" name="jobPick" value="${job.id}">
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between">
+              <div>
+                <div class="fw-semibold">${job.title}</div>
+                <div class="text-secondary small">${job.company} • ${job.location}</div>
+              </div>
+              <span class="badge bg-info-subtle text-dark">${(job.source || "").toUpperCase()}</span>
+            </div>
+            <div class="small text-secondary mt-1">Posted: ${job.posted_on}</div>
+            <div class="mt-2">
+              <a href="/get-job-detail/${job.id}" class="small" target="_blank" rel="noopener">View job</a>
+            </div>
+          </div>
+        `;
+            item.querySelector('input[type="radio"]').addEventListener("change", () => {
+                selectedJob = job;
+                toResumeBtn.disabled = false;
+            });
+            jobList.appendChild(item);
+        });
+        shownCount.textContent = String(jobs.length);
+        totalCount.textContent = String(jobs.length);
+        resultsMeta.textContent = `Source: ${meta.source}, Title: ${meta.title || "—"}, Location: ${meta.location || "—"}`;
+    }
+
+    // Step 2 → Step 3
+    toResumeBtn.addEventListener("click", () => {
+        if (!selectedJob) return;
+        setStep(2); // move to Step 3 active
+        resumeSection.classList.remove("hidden");
+        analyzeBtn.disabled = !resumeFile.files?.length;
+        window.scrollTo({ top: resumeSection.offsetTop - 80, behavior: "smooth" });
+    });
+
+    resumeFile.addEventListener("change", () => {
+        analyzeBtn.disabled = !resumeFile.files?.length;
+    });
+
+    // Step 3: Analyze
+    analyzeBtn.addEventListener("click", async () => {
+        if (!selectedJob || !resumeFile.files?.length) return;
+        setStep(3);
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerText = "Analyzing...";
+
+        // Prepare payload (replace with your API)
+        const formData = new FormData();
+        formData.append("job_id", selectedJob.id);
+        formData.append("resume", resumeFile.files[0]);
+
+        const res = await fetch("/api/ai/assess", { method: "POST", body: formData });
+        const data = await res.json();
+
+        // Simulated AI response matching your schema:
+        // const data = {
+        //     match_score: 65,
+        //     fit_level: "Moderate",
+        //     strengths: ["5 years of project management experience", "Proficient in Agile methodology"],
+        //     improvement_areas: ["Limited experience with budget management", "No certification in PMP"],
+        //     key_matches: ["Required 3+ years PM experience", "Agile methodology mentioned in job"],
+        //     missing_requirements: ["Budget management experience", "PMP certification preferred"],
+        //     actionable_advice: [
+        //         "Highlight any budget-related tasks in current role",
+        //         "Consider pursuing PMP certification",
+        //         "Add quantifiable project success metrics"
+        //     ],
+        //     resume_tips: [
+        //         "Move project management experience to top of resume",
+        //         "Include specific project budgets you've managed",
+        //         "Add Agile certification if available"
+        //     ],
+        //     overview: "You have strong foundational experience but should emphasize financial management aspects and consider additional certifications to be more competitive."
+        // };
+
+        renderAssessment(data);
+        assessmentSection.classList.remove("hidden");
+        setStep(3); // Step 4 active next
+        setTimeout(() => setStep(3), 0); // keep active state stable
+
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerText = "Analyze fit";
+        window.scrollTo({ top: assessmentSection.offsetTop - 80, behavior: "smooth" });
+    });
+
+    // Render assessment
+    function renderAssessment(result) {
+        const score = Math.max(0, Math.min(100, Number(result.match_score || 0)));
+        matchScoreText.textContent = score + "%";
+        matchProgress.style.width = score + "%";
+
+        // Fit badge color
+        const badgeMap = {
+            excellent: "bg-success",
+            strong: "bg-success-subtle text-success-emphasis border border-success-subtle",
+            moderate: "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+            weak: "bg-danger-subtle text-danger-emphasis border border-danger-subtle",
+            poor: "bg-danger"
+        };
+
+
+        overviewText.textContent = result.overview || "";
+
+        fillList(strengthsList, result.strengths);
+        fillList(improvementsList, result.improvement_areas);
+        fillList(missingReqsList, result.missing_requirements);
+        fillList(adviceList, result.actionable_advice);
+        fillList(tipsList, result.resume_tips);
+    }
+
+    function fillList(ul, items) {
+        ul.innerHTML = "";
+        if (Array.isArray(items) && items.length) {
+            items.forEach((t) => {
+                const li = document.createElement("li");
+                li.textContent = t;
+                ul.appendChild(li);
+            });
+        } else {
+            const li = document.createElement("li");
+            li.textContent = "No data available.";
+            ul.appendChild(li);
+        }
+    }
+
+    // Restart flow
+    restartBtn.addEventListener("click", () => {
+        selectedJob = null;
+        // Reset UI
+        resultsSection.classList.add("hidden");
+        resumeSection.classList.add("hidden");
+        assessmentSection.classList.add("hidden");
+        toResumeBtn.disabled = true;
+        analyzeBtn.disabled = true;
+        resumeFile.value = "";
+        jobList.innerHTML = "";
+        shownCount.textContent = "0";
+        totalCount.textContent = "0";
+        resultsMeta.textContent = "";
+        setStep(0); // back to step 1
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+</script>
+
+{% endblock %}

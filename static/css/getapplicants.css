@@ -1,0 +1,114 @@
+:root {
+    --primary-blue: #2563eb;
+    --secondary-blue: #3b82f6;
+    --light-blue: #dbeafe;
+    --dark-blue: #1e40af;
+}
+
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.main-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 30px;
+}
+
+.filter-card {
+    background: linear-gradient(135deg, var(--light-blue) 0%, #f1f5f9 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.application-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.application-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+    border-color: var(--primary-blue);
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-new { background: #dbeafe; color: var(--primary-blue); }
+.status-reviewed { background: #fef3c7; color: #d97706; }
+.status-shortlisted { background: #d1fae5; color: #059669; }
+.status-rejected { background: #fee2e2; color: #dc2626; }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-outline-primary {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    border-radius: 8px;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.applicant-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.search-box {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}

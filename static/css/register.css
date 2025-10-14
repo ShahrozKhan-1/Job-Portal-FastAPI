@@ -1,0 +1,137 @@
+body {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.signup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.signup-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 450px;
+    width: 100%;
+}
+
+.signup-header {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.signup-body {
+    padding: 2rem;
+}
+
+.form-control {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.form-select {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    transform: translateY(-2px);
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider span {
+    background: white;
+    padding: 0 1rem;
+    color: #6b7280;
+}
+
+.social-btn {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.login-link a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link a:hover {
+    color: #2563eb;
+}
+
+.terms-text {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.terms-text a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.terms-text a:hover {
+    text-decoration: underline;
+}

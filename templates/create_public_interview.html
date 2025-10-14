@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Public Interview{% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/create_public_interview.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card card-custom">
+          <div class="card-header card-header-custom">
+            <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Public Interview</h4>
+          </div>
+          <div class="card-body p-4">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+              <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Basic Info</div>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-label">Questions</div>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Review</div>
+              </div>
+            </div>
+
+            <!-- Interview Form -->
+            <form id="interviewForm">
+              <!-- Step 1: Basic Information -->
+              <div id="step1">
+                <h5 class="mb-4 text-primary">Basic Information</h5>
+
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <label for="title" class="form-label">Interview Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" name="title" required maxlength="255"
+                      placeholder="Enter a descriptive title for your interview">
+                    <div class="form-text">Maximum 255 characters</div>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                      <option value="">Select a category</option>
+                      <option value="Technical">Technical</option>
+                      <option value="Behavioral">Behavioral</option>
+                      <option value="Management">Management</option>
+                      <option value="Sales">Sales</option>
+                      <option value="Customer Service">Customer Service</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="4"
+                    placeholder="Provide a detailed description of this interview (optional)"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-primary-custom px-4" id="nextToStep2">Next <i
+                      class="fas fa-arrow-right ms-2"></i></button>
+                </div>
+              </div>
+
+              <!-- Step 2: Questions -->
+              <div id="step2" style="display: none;">
+                <h5 class="mb-4 text-primary">Interview Questions</h5>
+                <p class="text-muted mb-4">Add simple text questions for your interview.</p>
+
+                <div id="questionList">
+                  <!-- JS will add <input> elements here -->
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-primary-custom" id="backToStep1">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                  </button>
+                  <div>
+                    <button type="button" class="btn btn-outline-secondary me-2" id="addQuestion">
+                      <i class="fas fa-plus me-2"></i> Add Question
+                    </button>
+                    <button type="button" class="btn btn-primary-custom px-4" id="nextToStep3">
+                      Next <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: Review -->
+              <div id="step3" style="display: none;">
+                <h5 class="mb-4 text-primary">Review Interview</h5>
+                <p class="text-muted mb-4">Review your interview details before publishing.</p>
+
+                <div class="preview-box mb-4">
+                  <h6 class="text-primary">Basic Information</h6>
+                  <p><strong>Title:</strong> <span id="previewTitle"></span></p>
+                  <p><strong>Category:</strong> <span id="previewCategory"></span></p>
+                  <p><strong>Description:</strong> <span id="previewDescription"></span></p>
+                </div>
+
+                <div class="preview-box mb-4">
+                  <h6 class="text-primary">Questions</h6>
+                  <div id="previewQuestions"></div>
+                </div>
+
+                <div class="preview-box mb-3">
+                  <h6 class="text-primary">Interview Status</h6>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="statusToggle" checked />
+                    <label class="form-check-label" for="statusToggle">Interview is
+                      <strong id="statusLabel">Open</strong></label>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-primary-custom" id="backToStep2">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                  </button>
+                  <button type="submit" class="btn btn-primary-custom px-4">
+                    <i class="fas fa-check me-2"></i> Create Interview
+                  </button>
+                </div>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/create_public_interview.js') }}"></script>
+{% endblock %}

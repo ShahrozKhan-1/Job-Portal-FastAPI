@@ -1,0 +1,97 @@
+:root {
+    /* Blue & white theme */
+    --brand-primary: #0ea5e9;
+    /* sky-500 */
+    --brand-primary-dark: #0369a1;
+    /* sky-800 */
+    --brand-accent: #38bdf8;
+    /* sky-400 */
+    --brand-bg: #f8fbff;
+    /* subtle blue-tinted white */
+    --brand-card: #ffffff;
+    --brand-text: #0f172a;
+    /* slate-900 */
+        --primary-blue: #2563eb;
+    --light-blue: #3b82f6;
+}
+
+body {
+    background: linear-gradient(180deg, var(--brand-bg) 0%, #ffffff 60%);
+    color: var(--brand-text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.brand-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: #fff;
+}
+
+.brand-btn {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+    border: none;
+    color: #fff;
+}
+
+.brand-btn:hover {
+    background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
+    color: #fff;
+}
+
+.card {
+    border: 1px solid rgba(2, 132, 199, 0.08);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.08);
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #334155;
+}
+
+.step .circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+.step.active .circle {
+    background: var(--brand-primary);
+    color: #fff;
+}
+
+.step.completed .circle {
+    background: var(--brand-accent);
+    color: #0f172a;
+}
+
+.badge-fit {
+    font-size: .85rem;
+}
+
+.list-check li::marker {
+    color: var(--brand-primary-dark);
+}
+
+.list-x li::marker {
+    color: #dc2626;
+}
+
+.border-dashed {
+    border: 2px dashed rgba(2, 132, 199, 0.35);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.progress {
+    height: 10px;
+}

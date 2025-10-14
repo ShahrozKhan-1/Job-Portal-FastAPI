@@ -1,0 +1,85 @@
+{% extends "auth.html" %}
+
+{% block csslink %} 
+<link rel="stylesheet" href="{{ url_for('static', path='css/login.css') }}"> 
+{% endblock %}
+
+{% block title %}login{% endblock %}
+
+{% block content %}
+
+<div class="login-container my-3">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-briefcase fa-2x mb-3"></i>
+            <h3 class="mb-0">Welcome Back</h3>
+            <p class="mb-0 opacity-75">Sign in to your account</p>
+        </div>
+        
+        <div class="login-body">
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Enter your email" name="password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+            
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <button class="btn social-btn w-100">
+                        <i class="fab fa-google text-danger"></i>
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button class="btn social-btn w-100">
+                        <i class="fab fa-linkedin text-primary"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="signup-link">
+                <p class="mb-0">Don't have an account? <a href="{{ url_for('get_register') }}">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
+  };
+
+  const response = await fetch("/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    window.location.href = "/";
+  } else {
+    alert(result.error || "Login failed!"); 
+  }
+});
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %} Application Sent Jobs {% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/applicationsent.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10 mx-auto"> 
+    <div class="page-header rounded">
+        <div class="container">
+            <h2 class="mb-0">
+                <i class="fas fa-file-alt me-3"></i>My Applications
+            </h2>
+            <p class="mb-0 opacity-75">Track your job applications and their status</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">{{ applications|length }}</div>
+                    <div class="stats-label">Total Applications</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">{{ applications|selectattr("status", "equalto", "accepted")|list|length }}</div>
+                    <div class="stats-label">Accepted</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">{{ applications|selectattr("status", "equalto", "pending")|list|length }}</div>
+                    <div class="stats-label">Under Review</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">{{ applications|selectattr("status", "equalto", "shortlisted")|list|length }}</div>
+                    <div class="stats-label">Shortlisted</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-filter="all">All Applications</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-filter="pending">Pending</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-filter="accepted">Accepted</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-filter="rejected">Rejected</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Application Cards -->
+        <div class="row">
+            <div class="col-12">
+                {% for application in applications %}
+                {% set job = application.job %}
+                {% set company = job.company if job.company else "Unknown Company" %}
+                {% set initials = company.split() | map('upper') | map('first') | join('') %}
+                
+                <div class="job-card" data-status="{{ application.status }}">
+                    <div class="row align-items-center">
+                        <div class="col-md-1">
+                            <div class="applicant-avatar me-4">{{ initials }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="job-title">{{ job.title }}</h5>
+                            <p class="company-name">{{ company }}</p>
+                            <div class="job-meta">
+                                <div class="job-meta-item">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Applied: {{ application.applied_time.strftime("%b %d, %Y") }}
+                                </div>
+                                <div class="job-meta-item">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ job.location if job.location else "Not specified" }}
+                                </div>
+                                <div class="job-meta-item">
+                                    <i class="fas fa-briefcase me-1"></i>
+                                    {{ job.job_type if job.job_type else "Full-time" }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            {% if application.status == 'pending' %}
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock me-1"></i>Under Review
+                                </span>
+                            {% elif application.status == 'accepted' %}
+                                <span class="status-badge status-accepted">
+                                    <i class="fas fa-trophy me-1"></i>Accepted
+                                </span>
+                            {% elif application.status == 'rejected' %}
+                                <span class="status-badge status-rejected">
+                                    <i class="fas fa-times-circle me-1"></i>Rejected
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock me-1"></i>{{ application.status|title }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if application.last_updated %}
+                            <div class="mt-2 small text-muted">
+                                <i class="fas fa-sync me-1"></i>
+                                Updated: {{ application.last_updated.strftime("%b %d") }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <a href="{{ url_for('get_job_detail', job_id=job.id) }}" class="btn btn-outline-primary btn-sm mb-2">
+                                <i class="fas fa-eye me-1"></i>View Job
+                            </a>
+                            
+                            {% if application.status == 'accepted' and application.interview_time %}
+                                {% set interview_iso = application.interview_time.isoformat() %}
+                                <div class="mt-2">
+                                    <a href="{{ url_for('interview', job_id=job.id) }}"
+                                       class="btn btn-primary btn-sm interview-btn"
+                                       data-interview-time="{{ interview_iso }}">
+                                        <i class="fas fa-video me-1"></i>Join Interview
+                                    </a>
+                                    <div class="countdown-text small mt-1"></div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if application.status == 'shortlisted' %}
+                                <div class="mt-2">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-clock me-1"></i>Awaiting Interview
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        {% if not applications %}
+        <div class="empty-state" id="emptyState">
+            <i class="fas fa-file-alt"></i>
+            <h4>No Applications Yet</h4>
+            <p>You haven't applied to any jobs yet. Start exploring opportunities and take the next step in your career journey!</p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Browse Jobs
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/applicationsent.js') }}"></script>
+{% endblock %}

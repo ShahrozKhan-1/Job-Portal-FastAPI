@@ -1,0 +1,58 @@
+.container{
+    background-color: #f8fafc;
+}
+
+.header-card {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+}
+.score-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 20px;
+}
+/* Progress bar container */
+.progress-custom {
+    height: 25px;
+    background-color: #e5e7eb; /* light gray background */
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Inner progress bar */
+.progress-bar-custom {
+    height: 100%;
+    width: 0; /* initial width, will be updated via JS */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: width 1s ease-in-out;
+    border-radius: 12px;
+    color: #fff;
+}
+
+.feedback-box, .video-card, .transcript-box {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 20px;
+}
+.transcript-box {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.section-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+.video-card video {
+    border-radius: 12px;
+}

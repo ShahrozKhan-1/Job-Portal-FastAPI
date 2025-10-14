@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/getjobdetail.css') }}"> 
+
+{% endblock %}
+
+{% block content %}
+<!-- Wrapped content in main column to fit base template layout -->
+<div class="col-md-9 col-lg-10">
+    <div class="main-content p-4">
+        <!-- Job Header -->
+        <div class="job-header">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <img src="{{job.logo}}" 
+                         alt="{{ job.company }}" class="company-logo">
+                </div>
+                <div class="col-md-6">
+                    <h1 class="mb-2">{{ job.title }}</h1>
+                    <h5 class="text-muted mb-2">{{ job.company }}</h5>
+                    <!-- Added location display -->
+                    {% if job.location %}
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ job.location }}
+                    </p>
+                    {% endif %}
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% if job.seniority_level %}
+                        <span class="job-badge">{{ job.seniority_level }}</span>
+                        {% endif %}
+                        {% if job.employment_type %}
+                        <span class="job-badge">{{ job.employment_type }}</span>
+                        {% endif %}
+                        <span>Posted on {{ job.posted_on }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    {% if job.salary %}
+                    <div class="salary-badge mb-3">
+                        Rs. {{ job.salary }}
+                    </div>
+                    {% endif %}
+                    <div class="d-grid gap-2">
+                        {% set applied_job_ids = current_user.applicants | map(attribute='applied_for') | list %}
+
+                        {% if job.id in applied_job_ids %}
+                            <button class="btn btn-secondary" disabled>Already Applied</button>
+                        {% else %}    
+                        <a href="{{ job.link }}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-paper-plane me-2"></i>Apply Now
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-outline-primary" onclick="shareJob()">
+                            <i class="fas fa-share me-2"></i>Share Job
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Added comprehensive job information grid -->
+        <div class="job-info-grid">
+            {% if job.job_function %}
+            <div class="info-item">
+                <h6><i class="fas fa-briefcase me-2"></i>Job Function</h6>
+                <p class="mb-0">{{ job.job_function }}</p>
+            </div>
+            {% endif %}
+            
+            {% if job.industry %}
+            <div class="info-item">
+                <h6><i class="fas fa-industry me-2"></i>Industry</h6>
+                <p class="mb-0">{{ job.industry }}</p>
+            </div>
+            {% endif %}
+            
+            {% if job.employment_type %}
+            <div class="info-item">
+                <h6><i class="fas fa-clock me-2"></i>Employment Type</h6>
+                <p class="mb-0">{{ job.employment_type }}</p>
+            </div>
+            {% endif %}
+            
+            {% if job.source %}
+            <div class="info-item">
+                <h6><i class="fas fa-link me-2"></i>Source</h6>
+                <span class="source-badge">{{ job.source }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col">
+                <!-- Job Description -->
+                {% if job.description %}
+                <div class="content-card">
+                    <h3 class="mb-4">
+                        <i class="fas fa-file-text me-2 text-primary"></i>Job Description
+                    </h3>
+                    <p class="lead">{{ job.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Responsibilities -->
+                {% if job.responsibilities %}
+                <div class="content-card">
+                    <h3 class="mb-4">
+                        <i class="fas fa-tasks me-2 text-primary"></i>Responsibilities
+                    </h3>
+                    <p class="lead">{{ job.responsibilities }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Requirements -->
+                {% if job.requirements %}
+                <div class="content-card">
+                    <h3 class="mb-4">
+                        <i class="fas fa-list-check me-2 text-primary"></i>Requirements
+                    </h3>
+                    <p class="lead">{{ job.requirements }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Added skills section for JSON field -->
+                {% if job.skills %}
+                <div class="content-card">
+                    <h3 class="mb-4">
+                        <i class="fas fa-code me-2 text-primary"></i>Required Skills
+                    </h3>
+                    <div class="skills-container">
+                        {% if job.skills is string %}
+                            <!-- If skills is stored as a string -->
+                            {% for skill in job.skills.split(',') %}
+                                <span class="skill-tag">{{ skill.strip() }}</span>
+                            {% endfor %}
+                        {% elif job.skills is iterable %}
+                            <!-- If skills is stored as JSON array -->
+                            {% for skill in job.skills %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="skill-tag">{{ job.skills }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function shareJob() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ job.title }} at {{ job.company }}',
+            text: 'Check out this job opportunity!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Job link copied to clipboard!');
+        });
+    }
+}
+</script>
+{% endblock %}

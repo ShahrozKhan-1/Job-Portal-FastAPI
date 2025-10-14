@@ -1,0 +1,180 @@
+:root {
+    --primary-blue: #1e6fba;
+    --secondary-blue: #3498db;
+    --light-blue: #e8f4fc;
+    --dark-blue: #0d4a7a;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --success-green: #28a745;
+    --warning-orange: #ffc107;
+    --danger-red: #dc3545;
+
+}
+
+body {
+    background-color: var(--light-gray);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.brand-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    color: #fff;
+}
+
+
+.navbar-custom {
+    background-color: var(--primary-blue);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-custom {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-custom {
+    background-color: var(--primary-blue);
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px 20px;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+}
+
+.btn-outline-primary-custom {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.btn-outline-primary-custom:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-open {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
+
+.status-closed {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
+}
+
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.interview-card {
+    border-left: 4px solid var(--secondary-blue);
+}
+
+.interview-card.closed {
+    border-left-color: #6c757d;
+    opacity: 0.9;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box .form-control {
+    padding-left: 40px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.filter-dropdown .dropdown-menu {
+    padding: 15px;
+    min-width: 200px;
+}
+
+.footer-custom {
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 20px 0;
+    margin-top: 40px;
+}
+
+.pagination-custom .page-link {
+    color: var(--primary-blue);
+}
+
+.pagination-custom .page-item.active .page-link {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #dee2e6;
+}
+
+.action-buttons .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.category-badge {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}

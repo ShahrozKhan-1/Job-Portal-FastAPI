@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %} Search Job {% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/search.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <div class="search-header rounded">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="mb-3">Find Your Dream Job</h1>
+                <p class="mb-0 opacity-75">Search from thousands of job opportunities</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="container">
+        <div class="search-box">
+            <form method="post" action="{{url_for('post_search')}}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="title" class="form-control" placeholder="Job title, keywords..." id="jobSearch">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-map-marker-alt text-muted"></i>
+                            </span>
+                            <input type="text" name="location" class="form-control" placeholder="Location" id="locationSearch">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div>
+            <!-- Job Results -->
+            <div>
+
+                <!-- Job Cards -->
+                <div class="job-results">
+                    <!-- Job 1 -->
+                     {% for result in results %}
+                    <div class="job-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-1">
+                                <img src="{{result.logo}}" alt="Google" class="company-logo">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="mb-1"> {{result.title}} </h5>
+                                        <p class="text-muted mb-2"> {{result.company}} </p>
+                                    </div>
+                                    <button class="save-btn" onclick="toggleSave(this)">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="salary-badge">Rs. {{result.salary}} </span>
+                                <div class="mt-2">
+                                    <small class="text-muted">Posted on {{result.posted_on}}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <a href="{{url_for('get_job_detail', job_id=result.id)}}" class="btn btn-primary btn-sm mb-2 w-100" >View Details</a>
+                                <a href="{{result.link}}" class="btn btn-outline-primary btn-sm w-100">Quick Apply</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block csslink %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="col-md-9 col-lg-10">
+    <div class="main-content">
+        <!-- Enhanced welcome section with gradient background -->
+        <div class="welcome-section">
+            <h2>Welcome back, {{current_user.name}}!</h2>
+            <p>Here's what's happening with your job search today. Stay motivated and keep applying!</p>
+        </div>
+
+        <!-- Smaller stats cards with reduced columns -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-applications">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div class="stats-number">{{stats.applications}}</div>
+                    <div class="stats-label">Applications Sent</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-views">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stats-number">{{stats.shortlisted}}</div>
+                    <div class="stats-label">Interviews</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-saved">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <div class="stats-number">{{stats.saved}}</div>
+                    <div class="stats-label">Saved Jobs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced jobs section with modern card design -->
+        <div class="jobs-section">
+            <div class="jobs-header">
+                <h2><i class="fas fa-briefcase me-2"></i>Available Jobs</h2>
+            </div>
+            
+            {% if current_user.is_recruiter %}
+            <form method="post" action="{{ url_for('scrap_rozeepk') }}" class="mb-5">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="job_title" class="form-control" placeholder="Job title, keywords..." id="jobSearch">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-map-marker-alt text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control" name="location" placeholder="Location" id="locationSearch">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="jobType" name="source">
+                            <option value="rozeepk">Rozee.pk</option>
+                            <option value="linkedin">LinkedIn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Scrap
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+
+            <!-- Adding tabs for LinkedIn and Rozee.pk jobs -->
+            <ul class="nav nav-tabs justify-content-around job-tabs" id="jobTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="linkedin-tab" data-bs-toggle="tab" data-bs-target="#linkedin-jobs" type="button" role="tab">
+                        <i class="fab fa-linkedin me-2"></i>LinkedIn Jobs
+                        <span class="job-count-badge" id="linkedin-count">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rozee-tab" data-bs-toggle="tab" data-bs-target="#rozee-jobs" type="button" role="tab">
+                        <i class="fas fa-briefcase me-2"></i>Rozee.pk Jobs
+                        <span class="job-count-badge" id="rozee-count">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="user-posted-tab" data-bs-toggle="tab" data-bs-target="#user-posted-jobs" type="button" role="tab">
+                        <i class="fas fa-briefcase me-2"></i>User Posted Jobs
+                        <span class="job-count-badge" id="user-posted-count">0</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="jobTabsContent">
+                <!-- LinkedIn Jobs Tab -->
+                <div class="tab-pane fade show active" id="linkedin-jobs" role="tabpanel">
+                    <div id="linkedin-jobs-container">
+                        <!-- LinkedIn jobs will be populated here -->
+                    </div>
+                    <!-- Adding pagination for LinkedIn jobs -->
+                    <div class="pagination-container" id="linkedin-pagination" style="display: none;">
+                        <button class="pagination-btn" id="linkedin-prev">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <span class="pagination-info" id="linkedin-info"></span>
+                        <button class="pagination-btn" id="linkedin-next">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="page-size-selector">
+                            <label for="linkedin-page-size">Jobs per page:</label>
+                            <select id="linkedin-page-size">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Rozee.pk Jobs Tab -->
+                <div class="tab-pane fade" id="rozee-jobs" role="tabpanel">
+                    <div id="rozee-jobs-container">
+                        <!-- Rozee.pk jobs will be populated here -->
+                    </div>
+                    <!-- Adding pagination for Rozee.pk jobs -->
+                    <div class="pagination-container" id="rozee-pagination" style="display: none;">
+                        <button class="pagination-btn" id="rozee-prev">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <span class="pagination-info" id="rozee-info"></span>
+                        <button class="pagination-btn" id="rozee-next">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="page-size-selector">
+                            <label for="rozee-page-size">Jobs per page:</label>
+                            <select id="rozee-page-size">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="user-posted-jobs" role="tabpanel">
+                    <div id="user-posted-jobs-container">
+                        <!-- User Posted jobs will be populated here -->
+                    </div>
+                    <!-- Adding pagination for User posted jobs -->
+                    <div class="pagination-container" id="user-posted-pagination" style="display: none;">
+                        <button class="pagination-btn" id="user-posted-prev">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <span class="pagination-info" id="user-posted-info"></span>
+                        <button class="pagination-btn" id="user-posted-next">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="page-size-selector">
+                            <label for="user-posted-page-size">Jobs per page:</label>
+                            <select id="user-posted-page-size">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden container for all jobs (for JavaScript processing) -->
+            <div id="all-jobs" style="display: none;">
+                {% for job in jobs %}
+                <div class="job-item" data-source="{{ job.source }}">
+                    <!-- Improved bookmark positioning and styling -->
+                    <form action="{{ url_for('save_job', job_id=job.id) }}" method="post" class="position-absolute top-0 end-0 m-3">
+                        {% set saved_job_ids = current_user.savejob | map(attribute='job_id') | list %}
+                        <button class="bookmark-btn" {% if job.id in saved_job_ids %} disabled {% endif %}>
+                            {% if job.id in saved_job_ids %}
+                                <i class="fa-solid fa-bookmark fa-lg text-warning"></i>
+                            {% else %}
+                                <i class="fa-regular fa-bookmark fa-lg text-muted"></i>
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <!-- Enhanced job information layout -->
+                    <div class="pe-5">
+                        <a href="{{ url_for('get_job_detail', job_id=job.id) }}" class="job-title">
+                            {{ job.title }}
+                        </a>
+                        <div class="job-company">
+                            <i class="fas fa-building me-1"></i>{{ job.company }}
+                        </div>
+                        <div class="job-posted">
+                            <i class="fas fa-calendar me-1"></i>Posted on: {{ job.posted_on }}
+                        </div>
+                    </div>
+
+                    <!-- Enhanced action buttons with better styling -->
+                    {% if not current_user.is_recruiter %}
+                    <div class="position-absolute bottom-0 end-0 m-3">
+                        {% set applied_job_ids = current_user.applicants | map(attribute='applied_for') | list %}
+                        {% if job.id in applied_job_ids %}
+                            <button class="applied-btn" disabled>
+                                <i class="fas fa-check me-1"></i>Already Applied
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('apply_job', job_id=job.id) }}" class="apply-btn">
+                                <i class="fas fa-paper-plane me-1"></i>Apply Now
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Enhanced recruiter action buttons -->
+                    {% if current_user.is_recruiter %}
+                    <div class="position-absolute bottom-0 end-0 m-3">
+                        <div class="recruiter-actions">
+                            <a class="btn-edit" href="{{ url_for('get_edit_job', job_id=job.id) }}">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <a class="btn-delete" href="{{ url_for('delete_job', job_id=job.id) }}">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+{% endblock %}

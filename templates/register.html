@@ -1,0 +1,97 @@
+{% extends "auth.html" %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/register.css') }}">
+{% endblock %}
+
+{% block title %}Register{% endblock %}
+
+
+{% block content %}
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <i class="fas fa-user-plus fa-2x mb-3"></i>
+            <h3 class="mb-0">Create Account</h3>
+            <p class="mb-0 opacity-75">Join our job portal today</p>
+        </div>
+        
+        <div class="signup-body">
+            <form id="registerForm">        
+              <div class="mb-3">
+                  <label for="username" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="name" placeholder="John Doe" name="name">
+              </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" placeholder="john.doe@example.com" name="email">
+                </div>  
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Create a strong password" name="password">
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="is_recruiter" name="is_recruiter" value="true">
+                    <label class="form-check-label terms-text" for="is_recruiter">
+                        Check for Recruiter
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or sign up with</span>
+            </div>
+            
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <button class="btn social-btn w-100">
+                        <i class="fab fa-google text-danger me-2"></i>Google
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button class="btn social-btn w-100">
+                        <i class="fab fa-linkedin text-primary me-2"></i>LinkedIn
+                    </button>
+                </div>
+            </div>
+            
+            <div class="login-link">
+                <p class="mb-0">Already have an account? <a href=" {{url_for('get_login')}} ">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
+    is_recruiter: document.getElementById("is_recruiter").checked
+  };
+
+  const response = await fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    window.location.href = "/login";
+  } else {
+    alert(result.error || "Login failed!"); 
+  }
+});
+</script>
+{% endblock %}

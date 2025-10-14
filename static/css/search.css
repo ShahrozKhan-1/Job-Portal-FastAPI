@@ -1,0 +1,141 @@
+:root {
+    --primary-blue: #2563eb;
+    --light-blue: #3b82f6;
+    --dark-blue: #1e40af;
+}
+
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.search-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.search-box {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    margin-top: -1rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background: var(--dark-blue);
+    transform: translateY(-1px);
+}
+
+.job-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.job-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.salary-badge {
+    background: linear-gradient(135deg, #dbeafe, #f1f5f9);
+    color: var(--dark-blue);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--primary-blue);
+}
+
+.job-type-badge {
+    background: var(--primary-blue);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.filter-sidebar {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.filter-title {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.btn-outline-primary {
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    border-radius: 8px;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.results-header {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.save-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.save-btn:hover, .save-btn.saved {
+    color: #ef4444;
+}

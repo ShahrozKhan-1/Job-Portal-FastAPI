@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Public Interview</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .container {
+      max-width: 700px;
+      background: white;
+      padding: 30px;
+      margin-top: 50px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom {
+      background-color: #007bff;
+      color: white;
+      border-radius: 25px;
+      padding: 10px 25px;
+    }
+
+    .btn-custom:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h3 class="text-center text-primary mb-4">Edit Public Interview</h3>
+
+    <form id="editInterviewForm">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" id="title" class="form-control" value="{{interview.title}}" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        <input type="text" id="category" class="form-control" value="{{interview.category}}" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea id="description" class="form-control" rows="3">{{interview.description}}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select id="status" class="form-select" name="status">
+          <option value="true" {% if interview.status == True %}selected{% endif %}>Open</option>
+          <option value="false" {% if interview.status == False %}selected{% endif %}>Closed</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Questions</label>
+        <div id="questionsContainer">
+          {% if interview.questions %}
+            {% for question in interview.questions %}
+              <div class="question-item input-group mb-2">
+                <input
+                  type="text"
+                  class="form-control question-input" 
+                  value="{{ question }}"
+                  placeholder="Enter question"
+                />
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <button type="button" class="btn btn-outline-primary mt-2" id="addQuestionBtn">
+          + Add Question
+        </button>
+      </div>
+
+
+      <button type="submit" class="btn btn-custom w-100">Update Interview</button>
+    </form>
+  </div>
+  <div class="d-none" id="interview_id">{{interview.id}}</div>
+  
+
+  <script>
+  const addQuestionBtn = document.getElementById("addQuestionBtn");
+  const questionsContainer = document.getElementById("questionsContainer");
+  const form = document.getElementById("editInterviewForm");
+
+  // ➕ Add question field dynamically
+  addQuestionBtn.addEventListener("click", () => {
+    const div = document.createElement("div");
+    div.classList.add("question-item", "input-group", "mb-2");
+    div.innerHTML = `
+      <input type="text" class="form-control question-input" placeholder="Enter question" />
+      <button type="button" class="btn btn-danger remove-btn">X</button>
+    `;
+    questionsContainer.appendChild(div);
+  });
+
+  // ❌ Remove a question
+  questionsContainer.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-btn")) {
+      e.target.parentElement.remove();
+    }
+  });
+
+  // 🧾 Handle form submission (merge old + new)
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+    const category = document.getElementById("category").value;
+    const status = document.getElementById("status").value === "true";
+
+    // Collect all visible question inputs (old + new)
+    const questions = Array.from(document.querySelectorAll(".question-input"))
+      .map(q => q.value.trim())
+      .filter(q => q !== "");
+
+    // Send all questions back (not just new)
+    const data = { title, description, category, status, questions };
+
+    const interviewId = "{{ interview.id }}"; // Injected by Jinja
+
+    const response = await fetch(`/edit-public-interview/${interviewId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (response.redirected) {
+      window.location.href = response.url;
+    } else {
+      alert("Failed to update interview");
+    }
+  });
+</script>
+
+</body>
+</html>

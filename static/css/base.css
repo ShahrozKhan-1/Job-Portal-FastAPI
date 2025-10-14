@@ -1,0 +1,37 @@
+:root {
+    --primary-blue: #2563eb;
+    --light-blue: #3b82f6;
+    --dark-blue: #1e40af;
+    --bg-blue: #eff6ff;
+}
+
+body {
+    background-color: #f8fafc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    min-height: 100vh;
+    position: fixed;
+    width: 17%;
+}
+
+.sidebar .nav-link {
+    color: white;
+    padding: 12px 15px;
+    margin: 5px 0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    transform: translateX(5px);
+}
+
+.main-content {
+    padding: 20px;
+}
+

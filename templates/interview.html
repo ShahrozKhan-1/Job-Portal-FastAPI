@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/interview.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <header class="hero py-5 rounded">
+        <div class="container">
+            <div
+                class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                <div>
+                    <h1 class="mb-1">Voice Interview</h1>
+                    <p class="mb-0">Review your applied job and start the interview with AI when ready.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card p-3 p-md-4">
+                    <h5 class="section-title mb-2">Job Summary</h5>
+                    <div class="divider mb-3"></div>
+
+                    <div class="mb-2">
+                        <h4 class="mb-0" id="jobTitle"> {{applicant.job.title}} </h4>
+                        <div class="text-muted">
+                            <span id="jobCompany">{{applicant.job.company}}</span> •
+                            <span id="jobLocation">{{applicant.job.location}}</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-4">
+                            <div class="small text-muted">Employment Type</div>
+                            <div id="jobType" class="fw-semibold"> {{applicant.job.employment_type}} </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="small text-muted">Salary</div>
+                            <div id="jobSalary" class="fw-semibold"> {{applicant.job.salary}} </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="small text-muted">Posted On</div>
+                            <div id="jobPosted" class="fw-semibold"> {{applicant.job.posted_on}} </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="small text-muted mb-1">Job Description</div>
+                        <p id="jobDescription" class="mb-2"> {{applicant.job.description}} </p>
+                    </div>
+
+                    <div>
+                        <div class="small text-muted mb-2">Key Requirements</div>
+                        <div id="jobRequirements"> {{applicant.job.requirements}} </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <a href="{{url_for('get_job_detail', job_id=applicant.job.id)}}" id="jobLink"
+                            class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">Open Job</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card p-3 p-md-4">
+                    <h5 class="section-title mb-2">AI Voice Interview</h5>
+                    <div class="divider mb-3"></div>
+
+                    <p class="text-muted mb-3">
+                        When you start, we'll use your microphone. Answer the questions clearly. You can end the
+                        interview anytime.
+                    </p>
+
+                    <div class="d-grid gap-2 gap-sm-3 d-sm-flex">
+                        <a href="{{ url_for('chat') }}?applicant_id={{ applicant.id }}" class="btn btn-gradient px-4"
+                            id="startBtn">
+                            Start Voice Interview
+                        </a>
+                    </div>
+
+                    <div class="mt-3" id="recordingNote" style="display:none;">
+                        <div class="alert alert-info py-2 mb-2">
+                            Recording in progress. Speak after each question. Your audio won’t be shared until you end
+                            the interview.
+                        </div>
+                    </div>
+
+                    <div id="playbackWrap" class="mt-3" style="display:none;">
+                        <label class="form-label fw-semibold">Last Recording</label>
+                        <audio id="playback" class="w-100" controls></audio>
+                        <div class="d-flex gap-2 mt-2">
+                            <a id="downloadLink" class="btn btn-sm btn-primary"
+                                download="voice-interview.webm">Download</a>
+                            <button id="sendToAiBtn" class="btn btn-sm btn-success">Send to AI</button>
+                            <button id="discardBtn" class="btn btn-sm btn-outline-secondary">Discard</button>
+                        </div>
+                        <div id="aiStatus" class="small text-muted mt-2" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <div class="card mt-3 p-3">
+                    <div class="d-flex align-items-start">
+                        <div class="me-2 mt-1">
+                            <span class="badge-soft px-2 py-1">Tip</span>
+                        </div>
+                        <div class="small text-muted">
+                            Use concrete examples and metrics. Keep background noise low. If microphone permission is
+                            blocked, enable it in your browser settings.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% endblock %}
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/interview.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ interview.title }} - Public Interview{% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/public_interview.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+  <div class="container">
+    <div class="row mb-4 brand-header py-5 rounded">
+      <div class="col">
+        <h1 class="h3">Public Interview Detail</h1>
+        <p>See the detail about the public interview</p>
+      </div>
+    </div>
+
+    <!-- Interview Overview -->
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card card-custom mb-4">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <h1 class="h3 mb-0 me-3">{{ interview.title }}</h1>
+              <span class="status-badge status-{{ 'open' if interview.status else 'closed' }}">
+                {{ "Open" if interview.status else "Closed" }}
+              </span>
+            </div>
+
+            <p class="text-muted mb-4">{{ interview.description }}</p>
+
+            <div class="d-flex flex-wrap align-items-center">
+              <span class="category-badge me-3">{{ interview.category }}</span>
+              <small class="text-muted me-3">
+                <i class="fas fa-users me-1"></i>{{ attempt_count }} attempts
+              </small>
+              <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>Created {{ interview.created_at.strftime("%b %d, %Y") }}
+              </small>
+            </div>
+
+            <div class="mt-4">
+              {% if interview.status %}
+              {% if already_attempted %}
+                <button class="btn btn-secondary btn-sm" disabled>
+                  <i class="fas fa-check me-1"></i>Already Interviewed
+                </button>
+              {% else %}
+                <button class="btn btn-outline-secondary btn-sm start-interview-btn"
+                        data-interview-id="{{ interview.id }}">
+                  <i class="fas fa-play me-1"></i>Start Interview
+                </button>
+              {% endif %}
+            {% endif %}
+              <button class="btn btn-outline-secondary" id="shareBtn">
+                <i class="fas fa-share me-1"></i>Share
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interview Statistics -->
+        <div class="card card-custom">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-chart-bar me-2"></i>Interview Statistics
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="stats-list">
+              <div class="stat-item d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Category</span>
+                <span class="fw-bold">{{ interview.category }}</span>
+              </div>
+              <div class="stat-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Status</span>
+                <span class="badge bg-{{ 'success' if interview.status else 'secondary' }}">
+                  {{ "Active" if interview.status else "Closed" }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Creator Information -->
+      <div class="col-lg-4">
+        <div class="card card-custom">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-user me-2"></i>Interview Creator
+            </h5>
+          </div>
+          <div class="card-body text-center">
+            <div class="creator-avatar bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                 style="width: 80px; height: 80px;">
+              <span class="text-white h4">
+                {{ interview.creator.name[0].upper() if interview.creator.name else 'U' }}
+              </span>
+            </div>
+            <h6 class="mb-1">{{ interview.creator.name }}</h6>
+            <p class="text-muted small mb-2">{{ interview.creator.email }}</p>
+            <span class="badge bg-{{ 'success' if interview.creator.is_recruiter else 'info' }}">
+              {{ 'Recruiter' if interview.creator.is_recruiter else 'Candidate' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Resume Upload Modal -->
+<div class="modal fade" id="resumeUploadModal" tabindex="-1" aria-labelledby="resumeUploadLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="resumeUploadLabel">
+          Upload Your Resume to Begin Interview
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="resumeUploadForm" enctype="multipart/form-data">
+          <input type="hidden" id="selectedInterviewId" name="interview_id" value="{{interview.id}}">
+          <div class="mb-3">
+            <label for="resumeFile" class="form-label fw-bold">Choose Resume File (PDF, DOCX)</label>
+            <input type="file" class="form-control" id="resumeFile" name="resume" accept=".pdf,.doc,.docx" required>
+          </div>
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary-custom w-100">
+              <i class="fas fa-upload me-2"></i>Upload & Start Interview
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block jslink %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const startBtn = document.getElementById('startInterviewBtn');
+  if (startBtn) {
+    startBtn.addEventListener('click', function() {
+      alert('Starting interview: {{ interview.title }}');
+    });
+  }
+
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', function() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Interview link copied to clipboard!');
+      });
+    });
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = new bootstrap.Modal(document.getElementById("resumeUploadModal"));
+  const resumeForm = document.getElementById("resumeUploadForm");
+  const resumeInput = document.getElementById("resumeFile");
+  const selectedInterviewInput = document.getElementById("selectedInterviewId");
+
+  // When user clicks "Start Interview"
+  document.querySelectorAll(".start-interview-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const interviewId = btn.getAttribute("data-interview-id");
+      selectedInterviewInput.value = interviewId;
+      resumeInput.value = ""; // reset previous file
+      modal.show();
+    });
+  });
+
+  // On resume upload form submit
+  resumeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const interviewId = selectedInterviewInput.value;
+    const file = resumeInput.files[0];
+    if (!file) {
+      alert("Please select a resume file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    try {
+      const response = await fetch(`/upload-resume/${interviewId}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload resume.");
+      }
+
+      const data = await response.json();
+
+      // Redirect to public interview chat page
+      window.location.href = `/public-interview/start/${interviewId}?attempt_id=${data.attempt_id}`;
+
+    } catch (error) {
+      alert("Error uploading resume: " + error.message);
+    }
+  });
+});
+
+</script>
+{% endblock %}

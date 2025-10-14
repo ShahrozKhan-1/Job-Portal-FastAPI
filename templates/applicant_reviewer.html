@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %} Review Applicant {% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/applicant_reviewer.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<main class="col-md-9 col-lg-10">
+    <div class="search-header rounded">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="mb-3">Candidate Assessment</h1>
+                <p class="mb-0 opacity-75">AI-generated evaluation of the Candidate</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary" aria-live="polite">
+        <section class="card">
+            <h2>Overview</h2>
+            <p>
+                {{result.overview}}
+            </p>
+            <div class="actions">
+                <form method="post" action="{{url_for('applicant_status', applicant_id=applicant.id)}}"
+                    class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Current Status</label>
+                        <select class="form-select" name="status">
+                            <option value="pending" {% if applicant.status=='pending' %}selected{% endif %}>Pending
+                                Review</option>
+                            <option value="rejected" {% if applicant.status=='rejected' %}selected{% endif %}>Rejected
+                            </option>
+                            <option value="accepted" {% if applicant.status=='accepted' %}selected{% endif %}>Accepted
+                            </option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary w-100">
+                        <i class="fas fa-save me-1"></i>Update Status
+                    </button>
+                </form>
+            </div>
+        </section>
+        
+        <div class="score-card" aria-label="Match score">
+            <div class="score-head">
+                <div class="score-title">Match Score</div>
+                <div class="score-value" id="scoreValue"> {{result.match_score}} %</div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" 
+                    role="progressbar" 
+                    style="--progress: {{ result.match_score }}%;" 
+                    aria-valuenow="{{ result.match_score }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="100">
+                    {{ result.match_score }}%
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div id="fitBadge" 
+                class="fit {% if result.fit_for_job == 'Yes' %}fit--yes{% else %}fit--no{% endif %}" 
+                aria-label="Fit for job">
+                {{ result.fit_for_job }}
+            </div>
+            <p> {{result.reason_for_fit}} </p>
+
+        </div>
+
+    </div>
+
+    <div class="grid">
+        <section class="card">
+            <h2>Strengths</h2>
+            <ul id="strengthsList" class="list" aria-label="Strengths list">
+                {% for strength in result.strengths %}
+                <li>{{strength}}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>Weaknesses</h2>
+            <ul id="weaknessesList" class="list" aria-label="Weaknesses list">
+                {% for weakness in result.weaknesses %}
+                <li>{{weakness}}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+
+    </div>
+</main>
+
+{% endblock %}

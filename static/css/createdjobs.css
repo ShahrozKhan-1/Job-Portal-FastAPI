@@ -1,0 +1,191 @@
+/* Enhanced UI styling while maintaining blue theme */
+:root {
+    --primary-blue: #2563eb;
+    --light-blue: #3b82f6;
+    --dark-blue: #1e40af;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: white;
+    padding: 2.5rem 0;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.2);
+}
+
+.stats-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid var(--blue-50);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+}
+
+.stats-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(37, 99, 235, 0.15);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stats-label {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.job-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--blue-50);
+    position: relative;
+    overflow: hidden;
+}
+
+.job-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+}
+
+.job-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.12);
+}
+
+.applicant-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.job-title {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.company-name {
+    color: var(--primary-blue);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.job-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.meta-item i {
+    color: var(--primary-blue);
+}
+
+.btn-view {
+    background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+    color: white;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state i {
+    color: var(--primary-blue);
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    color: #1e293b;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title i {
+    color: var(--primary-blue);
+}

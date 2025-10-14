@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %} User Profile {% endblock %}
+
+{% block csslink %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="d-flex align-items-center">
+                <div class="avatar-placeholder me-4">
+                    {{ current_user.name[0].upper() if current_user.name else 'U' }}
+                </div>
+                <div>
+                    <h1>Welcome, {{ current_user.name }}!</h1>
+                    <p>Manage your account settings and preferences</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="profile-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-user"></i>
+                        Account Information
+                    </h2>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Username:</div>
+                        <div class="info-value">
+                            <span id="current-username">{{ current_user.name }}</span>
+                            <button class="btn-outline-modern ms-3" onclick="editUsername()">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Email:</div>
+                        <div class="info-value">{{ current_user.email }}</div>
+                    </div>
+                    <div id="username-form" class="username-edit-form" style="display: none;">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label-modern">New Username</label>
+                                <input type="text" class="form-control-modern" id="new-username" placeholder="Enter new username">
+                            </div>
+                            <div class="col-md-4 mt-3 mt-md-0">
+                                <button class="btn-modern me-2" onclick="saveUsername()">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button class="btn-secondary-modern" onclick="cancelEdit()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Settings
+                    </h2>
+                    
+                    <form id="password-form">
+                        <div class="mb-3">
+                            <label for="current-password" class="form-label-modern">Current Password</label>
+                            <input type="password" class="form-control-modern" id="current-password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new-password" class="form-label-modern">New Password</label>
+                            <input type="password" class="form-control-modern" id="new-password" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirm-password" class="form-label-modern">Confirm New Password</label>
+                            <input type="password" class="form-control-modern" id="confirm-password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-modern">
+                            <i class="fas fa-lock"></i>
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/profile.js') }}"></script>
+{% endblock %}

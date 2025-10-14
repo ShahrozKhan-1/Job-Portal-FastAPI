@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %} Add Job {% endblock %}
+
+{% block csslink %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/addjob.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <div class="form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-plus-circle me-2"></i>Post a New Job</h2>
+            <p class="mb-0">Fill in the details below to create a new job posting</p>
+        </div>
+
+        <form id="editjob">
+            <h4 class="section-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h4>
+            <input type="hidden" id="userId" value="{{ current_user.id }}">
+            <input type="hidden" id="jobId" value="{{ job.id }}">
+            <input type="hidden" id="source" value="{{ job.source }}">
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="jobTitle" class="form-label">Job Title <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="jobTitle" name="title" placeholder="e.g. Senior Frontend Developer" value="{{job.title}}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="companyName" class="form-label">Company Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="companyName" name="company" placeholder="e.g. Tech Giant Inc." value="{{job.company}}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="jobLink" class="form-label">Job Link <span class="required">*</span></label>
+                    <input type="url" class="form-control" id="jobLink" name="link" placeholder="https://company.com/jobs/123" value="{{job.link}}">
+                </div> 
+                <div class="col-md-6">
+                    <label for="companyLogo" class="form-label">Company Logo URL</label>
+                    <input type="url" class="form-control" id="companyLogo" name="logo" placeholder="https://company.com/logo.png" value="{{job.logo}}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="e.g. New York, NY or Remote" value="{{job.location}}">
+                </div>
+            </div>
+
+            <h4 class="section-title"><i class="fas fa-briefcase me-2"></i>Job Details</h4>
+            
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="salary" class="form-label">Salary</label>
+                    <input type="text" class="form-control" id="salary" name="salary" placeholder="e.g. $50,000 - $70,000" value="{{job.salary}}">
+                </div>
+                <div class="col-md-4">
+                    <label for="employmentType" class="form-label">Employment Type</label>
+                    <select class="form-select" id="employmentType" name="employment_type">
+                        <option value="" selected>{{job.employment_type}}</option>
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contract">Contract</option>
+                        <option value="temporary">Temporary</option>
+                        <option value="internship">Internship</option>
+                        <option value="freelance">Freelance</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="seniorityLevel" class="form-label">Seniority Level</label>
+                    <select class="form-select" id="seniorityLevel" name="seniority_level">
+                        <option value="" selected>{{job.seniority_level}}</option>
+                        <option value="internship">Internship</option>
+                        <option value="entry">Entry Level</option>
+                        <option value="associate">Associate</option>
+                        <option value="mid-senior">Mid-Senior Level</option>
+                        <option value="director">Director</option>
+                        <option value="executive">Executive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="jobFunction" class="form-label">Job Function</label>
+                    <select class="form-select" id="jobFunction" name="job_function">
+                        <option value="">{{job.job_function}}</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="design">Design</option>
+                        <option value="product">Product Management</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="sales">Sales</option>
+                        <option value="hr">Human Resources</option>
+                        <option value="finance">Finance</option>
+                        <option value="operations">Operations</option>
+                        <option value="customer-service">Customer Service</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="industry" class="form-label">Industry</label>
+                    <select class="form-select" id="industry" name="industry">
+                        <option value="" selected>{{job.industry}}</option>
+                        <option value="technology">Technology</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="finance">Finance</option>
+                        <option value="education">Education</option>
+                        <option value="retail">Retail</option>
+                        <option value="manufacturing">Manufacturing</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="media">Media & Communications</option>
+                        <option value="government">Government</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="postedOn" class="form-label">Posted Date</label>
+                <input type="date" class="form-control" id="postedOn" name="posted_on" value="{{job.posted_on}}">
+            </div>
+
+            <h4 class="section-title"><i class="fas fa-file-alt me-2"></i>Job Description</h4>
+            
+            <div class="mb-3">
+                <label for="jobDescription" class="form-label">Job Description <span class="required">*</span></label>
+                <textarea class="form-control" id="jobDescription" name="description" rows="5" placeholder="Describe the role, company culture, and what makes this opportunity exciting..." required> {{job.description}} </textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="responsibilities" class="form-label">Key Responsibilities</label>
+                <textarea class="form-control" id="responsibilities" name="responsibilities" rows="4" placeholder="• Lead development of new features&#10;• Collaborate with cross-functional teams&#10;• Mentor junior developers"> {{job.responsibilities}} </textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="requirements" class="form-label">Requirements <span class="required">*</span></label>
+                <textarea class="form-control" id="requirements" name="requirements" rows="4" placeholder="• Bachelor's degree in Computer Science or related field&#10;• 3+ years of experience with React&#10;• Strong problem-solving skills" > {{job.requirements}} </textarea>
+            </div>
+
+            <h4 class="section-title">Skills</h4>
+            <div class="mb-3">
+                <input type="text" id="skillInput" class="form-control" placeholder="Type a skill and press Enter">
+                <div id="skillsContainer" class="mt-2"></div>
+                <input type="hidden" name="skills" id="skillsData" >
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Edit Job
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block jslink %}
+<script src="{{ url_for('static', path='js/editjob.js') }}"></script>
+{% endblock %}
