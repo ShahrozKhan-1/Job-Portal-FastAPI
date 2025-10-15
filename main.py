@@ -8,10 +8,13 @@ from apps.websocket.websocket_route import websocket_router
 from apps.stt_tts.route import voice_router
 from apps.PublicInterview.public_interview import public_interview_router
 from apps.Interview.interview import interview_router
+from starlette.middleware.sessions import SessionMiddleware
+from config import SECRET_KEY
 
 
 app = FastAPI()
 
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")

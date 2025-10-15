@@ -1,45 +1,49 @@
 :root {
-    --primary-blue: #2563eb;
-    --secondary-blue: #3b82f6;
-    --light-blue: #dbeafe;
-    --dark-blue: #1e40af;
+    --primary-blue: #4361ee;
+    --secondary-blue: #3a0ca3;
+    --light-blue: #4cc9f0;
+    --dark-blue: #1d3557;
+    --success: #4ade80;
+    --info: #06d6a0;
+    --warning: #ffd166;
+    --danger: #ef476f;
+    --light-bg: #f8fafc;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 10px 30px rgba(67, 97, 238, 0.15);
 }
 
 body {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
-
 
 .main-content {
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
     margin: 20px;
     padding: 30px;
 }
 
 .filter-card {
-    background: linear-gradient(135deg, var(--light-blue) 0%, #f1f5f9 100%);
-    border: none;
-    border-radius: 12px;
-    padding: 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 25px;
     margin-bottom: 25px;
 }
 
 .application-card {
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border: 1px solid #f1f5f9;
     padding: 20px;
     margin-bottom: 15px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .application-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
     border-color: var(--primary-blue);
 }
 
@@ -48,9 +52,11 @@ body {
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
+    display: inline-flex;
+    align-items: center;
 }
 
-.status-new { background: #dbeafe; color: var(--primary-blue); }
+.status-pending { background: #dbeafe; color: var(--primary-blue); }
 .status-reviewed { background: #fef3c7; color: #d97706; }
 .status-shortlisted { background: #d1fae5; color: #059669; }
 .status-rejected { background: #fee2e2; color: #dc2626; }
@@ -58,57 +64,153 @@ body {
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
     border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
     transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
 }
 
 .btn-outline-primary {
-    border-color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
     color: var(--primary-blue);
-    border-radius: 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 .btn-outline-primary:hover {
     background: var(--primary-blue);
     border-color: var(--primary-blue);
+    transform: translateY(-1px);
 }
 
 .applicant-avatar {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
 }
 
 .stats-card {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
     color: white;
-    border-radius: 12px;
     padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: left;
+    margin-bottom: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-box {
-    border: 2px solid #e2e8f0;
     border-radius: 10px;
     padding: 12px 15px;
     transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
 }
 
 .search-box:focus {
     border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.input-group-text {
+    border-radius: 10px 0 0 10px;
+    border: 1px solid #e2e8f0;
+    border-right: none;
+    background: white;
+}
+
+.form-select, .form-control {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 10px 15px;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.dropdown-menu {
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f1f5f9;
+}
+
+.dropdown-item {
+    padding: 8px 15px;
+    border-radius: 5px;
+    margin: 2px 5px;
+    width: auto;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+}
+
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: none;
+    color: var(--dark-blue);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-blue);
+}
+
+.rounded-4 {
+    border-radius: 16px !important;
+}
+
+/* Status-specific colors */
+.bg-info { background: linear-gradient(135deg, var(--info) 0%, #06b6d4 100%) !important; }
+.bg-success { background: linear-gradient(135deg, var(--success) 0%, #10b981 100%) !important; }
+.bg-warning { background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%) !important; }
+.bg-danger { background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%) !important; }
+.bg-dark { background: linear-gradient(135deg, #374151 0%, #111827 100%) !important; }
+
+@media (max-width: 992px) {
+    .main-content {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .stats-card {
+        margin-bottom: 15px;
+    }
+    
+    .application-card .row > div {
+        margin-bottom: 10px;
+    }
 }

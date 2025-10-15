@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                             <div class="col-md-2 text-end">
-                                <a href="{{url_for('get_job_detail',job_id=job.id)}}"
+                                <a href="{{url_for('get_job_detail',job_id=job.job.id)}}"
                                     class="btn btn-primary btn-sm mb-2 w-100">View Job</a>
                                 <a href="{{url_for('delete_saved_job',job_id=job.id)}}"
                                     class="btn btn-outline-danger btn-sm w-100" onclick="removeSavedJob(this)">

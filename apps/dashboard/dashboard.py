@@ -75,6 +75,7 @@ async def add_job(
         ).first()
 
         if existing_job:
+            request.session["message"] = {"text": "Job already exists!", "type": "warning"}
             return JSONResponse({"msg": "Job already exists, skipping insert."}, status_code=400)
 
         new_job = Job(
@@ -102,19 +103,22 @@ async def add_job(
         db.commit()
         db.refresh(new_job)
         return new_job
+    request.session["message"] = {"text": "Job added successfully!", "type": "success"}
     return RedirectResponse(url="/dashboard", headers={"success":"Job Added Successfully"}, status_code=302)
 
 
 @dashboard_router.get("/delete-job/{job_id}")
-async def delete_job(job_id:int, db:Session=Depends(get_db), current_user=Depends(get_current_user)):
+async def delete_job(request:Request, job_id:int, db:Session=Depends(get_db), current_user=Depends(get_current_user)):
     if current_user.is_recruiter:
         delete_job = db.query(Job).filter_by(id=job_id).first()
         if current_user.id != delete_job.user_id:
+            request.session["message"] = {"text": "You can delete only your own job!", "type": "warning"}
             return JSONResponse({"message":"Only the owner can delete this job"})
         if not delete_job:
             return JSONResponse({"message":"Can not delete the job"})
         db.delete(delete_job)
         db.commit()
+    request.session["message"] = {"text": "Job deleted successfully!", "type": "success"}
     return RedirectResponse(url="/dashboard", headers={"success":"Job Deleted Successfully"}, status_code=302)
 
 
@@ -126,6 +130,11 @@ def get_edit_job(
     current_user=Depends(get_current_user)
 ):
     job = db.query(Job).filter_by(id=job_id).first()
+    if not job:
+        request.session["message"] = {"text": "Job not found!", "type": "error"}
+    if job.user_id != current_user.id:
+        request.session["message"] = {"text": "You can edit only your own job!", "type": "warning"}
+        return RedirectResponse(url="/dashboard", status_code=302)
     return templates.TemplateResponse("editjob.html", {"request":request, "job":job, "current_user":current_user})
 
 
@@ -140,6 +149,7 @@ async def put_edit_job(
     if current_user.is_recruiter:
         db_job = db.query(Job).filter_by(id = job_id).first()
         if current_user.id != db_job.user_id:
+            request.session["message"] = {"text": "You can edit only your own job!", "type": "warning"}
             return JSONResponse({"message":"Only the owner can edit this job"})
         if not db_job:
             return JSONResponse({"message":"Job not found"})
@@ -159,6 +169,7 @@ async def put_edit_job(
         db_job.salary=job.salary
         db.commit()
         db.refresh(db_job)
+        request.session["message"] = {"text": "Job updated successfully!", "type": "success"}
         return RedirectResponse(url="/dashboard", headers={"success":"Job Edited Successfully"}, status_code=302)
     return JSONResponse({"message":"Only recruiter can edit job"})
 
@@ -220,15 +231,30 @@ async def apply_job(
 
 @dashboard_router.get("/get-applicant", response_model=List[ApplicantResponse])
 async def get_applicants(
-    request:Request,
-    db:Session=Depends(get_db),
-    current_user=Depends(get_current_user)
+    request: Request,
+    search: str = None,
+    position: str = None,
+    status: str = None,
+    interview: str = None,
+    date: str = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     if current_user.is_recruiter:
         jobs = db.query(Job.id).filter_by(user_id=current_user.id).subquery()
         applicants = db.query(Applicant).filter(Applicant.applied_for.in_(jobs)).all()
-        return templates.TemplateResponse("getapplicants.html", {"current_user":current_user, "request":request, "applicants":applicants})
-
+        
+        # Pass query parameters to template
+        return templates.TemplateResponse("getapplicants.html", {
+            "current_user": current_user,
+            "request": request,
+            "applicants": applicants,
+            "search_query": search,
+            "position_query": position,
+            "status_query": status,
+            "interview_query": interview,
+            "date_query": date
+        })
 
 
 @dashboard_router.get("/get-job-applicant/{job_id}", response_model=List[ApplicantResponse])

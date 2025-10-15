@@ -4,325 +4,157 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const wsUrl = `${protocol}//${window.location.host}/ws/public-interview/${interviewId}?attempt_id=${attemptId}`;
-
   const ws = new WebSocket(wsUrl);
 
+  // Elements
   const chatBox = document.getElementById("chat-box");
   const micBtn = document.getElementById("micBtn");
   const listeningIndicator = document.getElementById("listeningIndicator");
   const statusEl = document.getElementById("status");
   const statusDot = document.getElementById("statusDot");
-
-  // Camera elements
   const cameraPreview = document.getElementById("cameraPreview");
   const cameraPlaceholder = document.getElementById("cameraPlaceholder");
   const recordingStatus = document.getElementById("recordingStatus");
   const recordingTimer = document.getElementById("recordingTimer");
 
+  // State
   let recognition;
   let currentQuestion = null;
   let isListening = false;
   let interviewStarted = false;
+  let interviewComplete = false;
   let speechSupported = false;
   let silenceTimer = null;
   let finalTranscript = "";
+  let hasProcessedAnswer = false;
 
-  // Recording variables
+  // Recording
   let mediaStream = null;
   let mediaRecorder = null;
   let recordedChunks = [];
+  let mixedStream = null;
   let isRecording = false;
   let recordingStartTime = null;
   let recordingTimerInterval = null;
-  let interviewComplete = false;
 
-  // Audio mixing variables
+  // Audio mixing
   let audioContext = null;
   let microphoneSource = null;
-  let ttsSource = null;
   let destination = null;
-  let mixedStream = null;
 
-  // --- CAMERA SETUP WITH AUDIO MIXING ---
-  async function initializeCamera() {
+  // Cached voice
+  let cachedVoice = null;
+
+  // --- INIT FUNCTIONS ---
+  async function preloadVoices() {
+    return new Promise((resolve) => {
+      function load() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          cachedVoice =
+            voices.find(v => v.lang === "en-GB" && v.name.toLowerCase().includes("female")) ||
+            voices.find(v => v.lang === "en-GB") ||
+            voices[0];
+          resolve();
+        } else {
+          window.speechSynthesis.onvoiceschanged = load;
+        }
+      }
+      load();
+    });
+  }
+
+  async function initMedia() {
     try {
-      // Get camera and microphone
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 },
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100,
-        },
-      });
+      if (!mediaStream) {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+          audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
+        });
+      }
 
-      // Setup audio context for mixing
-      await setupAudioMixing();
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        destination = audioContext.createMediaStreamDestination();
+        microphoneSource = audioContext.createMediaStreamSource(mediaStream);
+        microphoneSource.connect(destination);
+      }
+
+      mixedStream = new MediaStream([
+        ...mediaStream.getVideoTracks(),
+        ...destination.stream.getAudioTracks(),
+      ]);
 
       cameraPreview.srcObject = mediaStream;
       cameraPreview.style.display = "block";
       cameraPlaceholder.style.display = "none";
-
-      console.log("🎥 Camera and microphone enabled with audio mixing");
-      return true;
+      console.log("🎥 Camera + mic ready");
     } catch (error) {
-      console.error("Error accessing camera:", error);
-      appendMessage("ai", "Unable to access camera. Please check permissions.");
-      return false;
+      console.error("Camera error:", error);
+      appendMessage("ai", "Unable to access camera or mic. Check permissions.");
     }
   }
 
-  // --- AUDIO MIXING SETUP ---
-  async function setupAudioMixing() {
-    try {
-      // Create audio context
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Create destination for mixed audio
-      destination = audioContext.createMediaStreamDestination();
+  // --- RECORDING ---
+  function initRecorder() {
+    if (!mixedStream) return;
+    recordedChunks = [];
+    const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+      ? "video/webm;codecs=vp9,opus"
+      : "video/webm";
 
-      // Connect microphone to destination
-      microphoneSource = audioContext.createMediaStreamSource(mediaStream);
-      microphoneSource.connect(destination);
+    mediaRecorder = new MediaRecorder(mixedStream, { mimeType: mime, videoBitsPerSecond: 2500000 });
 
-      // Create mixed stream with video + mixed audio
-      mixedStream = new MediaStream([
-        ...mediaStream.getVideoTracks(),
-        ...destination.stream.getAudioTracks()
-      ]);
-
-      console.log("🎤 Audio mixing setup complete - ready to capture TTS");
-      return true;
-    } catch (error) {
-      console.error("Error setting up audio mixing:", error);
-      // Fallback to original stream
-      mixedStream = mediaStream;
-      return false;
-    }
+    mediaRecorder.ondataavailable = (e) => e.data.size > 0 && recordedChunks.push(e.data);
+    mediaRecorder.onstop = handleRecordingStop;
+    console.log("🎬 Recorder ready");
   }
 
-  // --- TTS CAPTURE USING SPEECH SYNTHESIS ---
-  function captureTTSAudio(text) {
-    return new Promise((resolve) => {
-      if (!audioContext) {
-        // Fallback without audio mixing
-        speakWithoutCapture(text).then(resolve);
-        return;
-      }
-
-      // Create a temporary audio element to capture TTS
-      const audioElement = new Audio();
-      const mediaElementSource = audioContext.createMediaElementSource(audioElement);
-      mediaElementSource.connect(destination);
-
-      // Use the Speech Synthesis API
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      // Set voice preferences
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        const ukFemaleVoice = voices.find(
-          (voice) =>
-            voice.name.toLowerCase().includes("google uk english female") ||
-            (voice.lang === "en-GB" && voice.name.toLowerCase().includes("female")) ||
-            (voice.lang === "en-GB" && voice.name.toLowerCase().includes("google"))
-        );
-        utterance.voice = ukFemaleVoice || voices.find((v) => v.lang === "en-GB") || voices[0];
-        utterance.lang = "en-GB";
-      }
-
-      // Create a workaround to capture TTS audio
-      // This uses the fact that TTS plays through system audio
-      // and will be captured by the microphone if speakers are on
-      console.log("🔊 Starting TTS with audio capture");
-
-      // Start TTS
-      window.speechSynthesis.speak(utterance);
-
-      utterance.onstart = () => {
-        console.log("TTS started - audio should be captured through microphone");
-      };
-
-      utterance.onend = () => {
-        console.log("TTS completed");
-        // Clean up
-        mediaElementSource.disconnect();
-        
-        setTimeout(() => {
-          startListening();
-          resolve();
-        }, 500);
-      };
-
-      utterance.onerror = (event) => {
-        console.error("TTS error:", event.error);
-        mediaElementSource.disconnect();
-        speakWithoutCapture(text).then(resolve);
-      };
-    });
-  }
-
-  // Fallback TTS without capture
-  function speakWithoutCapture(text) {
-    return new Promise((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        const ukFemaleVoice = voices.find(
-          (voice) =>
-            voice.name.toLowerCase().includes("google uk english female") ||
-            (voice.lang === "en-GB" && voice.name.toLowerCase().includes("female")) ||
-            (voice.lang === "en-GB" && voice.name.toLowerCase().includes("google"))
-        );
-        utterance.voice = ukFemaleVoice || voices.find((v) => v.lang === "en-GB") || voices[0];
-        utterance.lang = "en-GB";
-      }
-
-      window.speechSynthesis.speak(utterance);
-
-      utterance.onend = () => {
-        setTimeout(() => {
-          startListening();
-          resolve();
-        }, 500);
-      };
-    });
-  }
-
-  // --- RECORDING FUNCTIONS ---
-  function initializeMediaRecorder() {
-    const streamToRecord = mixedStream || mediaStream;
-    
-    if (!streamToRecord) {
-      console.error("No stream available for recording");
-      return false;
-    }
-
-    try {
-      recordedChunks = [];
-      
-      // Try preferred MIME type first
-      if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")) {
-        mediaRecorder = new MediaRecorder(streamToRecord, {
-          mimeType: "video/webm;codecs=vp9,opus",
-          videoBitsPerSecond: 2500000,
-        });
-      } else {
-        mediaRecorder = new MediaRecorder(streamToRecord);
-      }
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunks.push(event.data);
-          console.log(`Recorded chunk: ${event.data.size} bytes`);
-        }
-      };
-
-      mediaRecorder.onstop = handleRecordingStop;
-      console.log("🎬 MediaRecorder initialized with mixed audio stream");
-      return true;
-    } catch (error) {
-      console.error("MediaRecorder error:", error);
-      return false;
-    }
-  }
-
-  // Start recording ONCE at the beginning
-  function startInterviewRecording() {
-    if (!mediaRecorder) {
-      console.error("MediaRecorder not initialized");
-      return false;
-    }
-
-    if (mediaRecorder.state === "recording") {
-      console.log("Recording already in progress");
-      return true;
-    }
-
-    try {
-      mediaRecorder.start(1000); // Collect data every second
+  function startRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "recording") {
+      mediaRecorder.start(1000);
       isRecording = true;
       recordingStatus.classList.remove("hidden");
       startRecordingTimer();
-      console.log("📹 Interview recording STARTED - capturing microphone + TTS");
-      return true;
-    } catch (error) {
-      console.error("Error starting recording:", error);
-      return false;
+      console.log("📹 Recording started");
     }
   }
 
-  // Stop recording ONLY ONCE at the end
-  function stopInterviewRecording() {
-    if (!mediaRecorder || mediaRecorder.state !== "recording") {
-      console.log("No active recording to stop");
-      return;
-    }
-
-    try {
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.stop();
       isRecording = false;
-      console.log("Interview recording STOPPED");
-    } catch (error) {
-      console.error("Error stopping recording:", error);
+      recordingStatus.classList.add("hidden");
+      stopRecordingTimer();
+      console.log("📹 Recording stopped");
     }
-
-    recordingStatus.classList.add("hidden");
-    stopRecordingTimer();
   }
 
-  // Upload immediately after stopping
   function handleRecordingStop() {
-    console.log(`🎬 Recording stopped. Collected ${recordedChunks.length} chunks`);
-
-    if (recordedChunks.length === 0) {
-      console.error("No video data recorded");
-      appendMessage("ai", "No recording data available.");
-      return;
-    }
-
     const blob = new Blob(recordedChunks, { type: "video/webm" });
-    console.log(`Created video blob: ${blob.size} bytes`);
-    uploadRecording(blob);
+    if (blob.size > 0) {
+      setTimeout(() => uploadRecording(blob), 1500); // slight delay for smooth UI
+    } else {
+      appendMessage("ai", "No recording data available.");
+    }
   }
-
+  ////////////////////////////////////////
   async function uploadRecording(blob) {
-    console.log("Starting video upload...");
-
     const formData = new FormData();
     formData.append("video", blob, `interview-${interviewId}-attempt-${attemptId}.webm`);
     formData.append("interview_id", interviewId);
     formData.append("attempt_id", attemptId);
 
     try {
-      appendMessage("ai", "Uploading interview recording...");
-
-      const response = await fetch("/upload-public-interview-video", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
-
+      appendMessage("ai", "Uploading recording...");
+      const response = await fetch("/upload-public-interview-video", { method: "POST", body: formData });
+      if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
       const result = await response.json();
-      console.log("Full interview video uploaded successfully:", result.video_url);
-      appendMessage("ai", "Interview recording uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      appendMessage("ai", "Failed to upload recording. Please contact support.");
+      appendMessage("ai", "✅ Interview video uploaded!");
+      console.log("Upload success:", result.video_url);
+    } catch (err) {
+      console.error("Upload error:", err);
+      appendMessage("ai", "Upload failed. Please contact support.");
     }
   }
 
@@ -330,91 +162,101 @@ document.addEventListener("DOMContentLoaded", () => {
     recordingStartTime = Date.now();
     recordingTimerInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-      const minutes = Math.floor(elapsed / 60).toString().padStart(2, "0");
-      const seconds = (elapsed % 60).toString().padStart(2, "0");
-      recordingTimer.textContent = `${minutes}:${seconds}`;
+      recordingTimer.textContent = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
     }, 1000);
   }
 
   function stopRecordingTimer() {
-    if (recordingTimerInterval) {
-      clearInterval(recordingTimerInterval);
-      recordingTimerInterval = null;
-    }
+    clearInterval(recordingTimerInterval);
     recordingTimer.textContent = "00:00";
   }
 
-  // --- VOICE FUNCTIONS ---
-  function ensureVoicesLoaded() {
-    return new Promise((resolve) => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length !== 0) resolve();
-      else window.speechSynthesis.onvoiceschanged = () => resolve();
-    });
-  }
-
-  function checkSpeechSupport() {
-    speechSupported = "speechSynthesis" in window;
-    return speechSupported;
-  }
-
+  // --- SPEECH FUNCTIONS ---
   function appendMessage(sender, text) {
+    const frag = document.createDocumentFragment();
     const div = document.createElement("div");
     div.className = sender === "ai" ? "ai-message" : "user-message";
     div.textContent = text;
-    chatBox.appendChild(div);
+    frag.appendChild(div);
+    chatBox.appendChild(frag);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
   function speakQuestion(text) {
-    if (!checkSpeechSupport()) {
-      micBtn.disabled = false;
-      return Promise.resolve();
-    }
+    if (!speechSupported) return Promise.resolve();
+    return new Promise((resolve) => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.voice = cachedVoice;
+      utterance.lang = "en-GB";
 
-    window.speechSynthesis.cancel();
-    return captureTTSAudio(text);
+      utterance.onend = () => setTimeout(() => { startListening(); resolve(); }, 100);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    });
   }
 
   function startListening() {
-    if (!interviewStarted) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition not supported in this browser.");
-      return;
+    if (!recognition) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return alert("Speech recognition not supported.");
+      recognition = new SR();
+      recognition.lang = "en-US";
+      recognition.interimResults = true;
+      recognition.continuous = true;
     }
 
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = true;
-    recognition.continuous = true;
-
+    if (isListening) return;
+    recognition.abort();
     finalTranscript = "";
+    hasProcessedAnswer = false;
+
+    const hardTimeout = setTimeout(() => {
+      if (!hasProcessedAnswer) {
+        hasProcessedAnswer = true;
+        stopListening();
+        processAnswer("(no response detected)");
+      }
+    }, 8000);
 
     recognition.onstart = () => {
       isListening = true;
       listeningIndicator.classList.remove("hidden");
       micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Listening...';
-      micBtn.classList.add("btn-warning");
-      micBtn.classList.remove("btn-primary");
+      micBtn.classList.replace("btn-primary", "btn-warning");
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (e) => {
       clearTimeout(silenceTimer);
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal)
-          finalTranscript += event.results[i][0].transcript;
-      }
-
+      for (let i = e.resultIndex; i < e.results.length; ++i)
+        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
       silenceTimer = setTimeout(() => {
-        if (finalTranscript.trim() !== "") processAnswer(finalTranscript);
-        else stopListening();
-      }, 3000);
+        if (!hasProcessedAnswer) {
+          hasProcessedAnswer = true;
+          stopListening();
+          processAnswer(finalTranscript.trim() || "(no response detected)");
+        }
+      }, 1500);
     };
 
-    recognition.onerror = () => stopListening();
-    recognition.onend = () => stopListening();
+    recognition.onerror = () => {
+      if (!hasProcessedAnswer) {
+        hasProcessedAnswer = true;
+        stopListening();
+        processAnswer("(no response detected)");
+      }
+    };
+
+    recognition.onend = () => {
+      clearTimeout(hardTimeout);
+      clearTimeout(silenceTimer);
+      if (!hasProcessedAnswer) {
+        hasProcessedAnswer = true;
+        processAnswer(finalTranscript.trim() || "(no response detected)");
+      }
+      stopListening();
+    };
 
     recognition.start();
   }
@@ -422,66 +264,50 @@ document.addEventListener("DOMContentLoaded", () => {
   function stopListening() {
     clearTimeout(silenceTimer);
     if (recognition && isListening) {
-      try {
-        recognition.stop();
-      } catch { }
+      try { recognition.stop(); } catch { }
     }
-
     isListening = false;
     listeningIndicator.classList.add("hidden");
     micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Processing...';
-    micBtn.classList.remove("btn-warning");
-    micBtn.classList.add("btn-secondary");
+    micBtn.classList.replace("btn-warning", "btn-secondary");
     micBtn.disabled = true;
   }
 
   function processAnswer(transcript) {
     appendMessage("user", transcript);
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ answer: transcript }));
-    }
+    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ answer: transcript }));
   }
 
-  // --- WebSocket handlers ---
+  // --- WEBSOCKET HANDLERS ---
   ws.onopen = async () => {
     statusEl.textContent = "Connected - Interview Starting";
     statusDot.classList.add("active");
+    speechSupported = "speechSynthesis" in window;
 
-    await ensureVoicesLoaded();
-    checkSpeechSupport();
+    // Parallel init (camera + voices)
+    await Promise.all([initMedia(), preloadVoices()]);
+    initRecorder();
+
     micBtn.disabled = true;
     micBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Starting...';
   };
 
   ws.onmessage = async (event) => {
     const data = JSON.parse(event.data);
-
     if (data.type === "welcome") {
       appendMessage("ai", `Total questions: ${data.total_questions}`);
       interviewStarted = true;
-
-      // Initialize camera and audio mixing
-      const cameraReady = await initializeCamera();
-      if (cameraReady) {
-        const recorderReady = initializeMediaRecorder();
-        if (recorderReady) {
-          setTimeout(startInterviewRecording, 1000);
-        }
-      }
-
+      setTimeout(startRecording, 1000);
     } else if (data.type === "question") {
       currentQuestion = data.question;
       appendMessage("ai", `${data.index}/${data.total_questions}: ${currentQuestion}`);
       micBtn.disabled = true;
       await speakQuestion(`Question ${data.index}. ${currentQuestion}`);
-
     } else if (data.type === "ack") {
       appendMessage("ai", data.message);
       micBtn.disabled = false;
       micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Start Speaking';
-      micBtn.classList.remove("btn-secondary");
-      micBtn.classList.add("btn-primary");
-
+      micBtn.classList.replace("btn-secondary", "btn-primary");
     } else if (data.type === "complete") {
       interviewComplete = true;
       appendMessage("ai", data.message);
@@ -491,14 +317,12 @@ document.addEventListener("DOMContentLoaded", () => {
       micBtn.classList.remove("btn-primary", "btn-warning", "btn-secondary");
       micBtn.classList.add("btn-success");
       stopListening();
-
-      // Stop recording ONLY ONCE at the end
-      console.log("🎬 Interview complete - stopping recording");
-      stopInterviewRecording();
-
-      setTimeout(() => {
-        if (ws.readyState === WebSocket.OPEN) ws.close();
-      }, 3000);
+      stopRecording();
+      // setTimeout(() => {
+      //   ws.close();
+      //   window.location.href = "/all-public-interviews";
+      // }, 4000);
+      // setTimeout(() => ws.close(), 3000);
     }
   };
 
@@ -506,37 +330,17 @@ document.addEventListener("DOMContentLoaded", () => {
     statusEl.textContent = "Disconnected";
     statusDot.classList.remove("active");
     stopListening();
-
-    // If interview wasn't properly completed but connection closed, stop recording
-    if (isRecording && !interviewComplete) {
-      console.log("🔌 Connection closed - stopping recording");
-      interviewComplete = true;
-      stopInterviewRecording();
-    }
+    if (isRecording && !interviewComplete) stopRecording();
   };
 
-  // Cleanup
+  // --- CLEANUP ---
   window.addEventListener("beforeunload", () => {
     if (ws.readyState === WebSocket.OPEN) ws.close();
     if (recognition && isListening) recognition.stop();
     window.speechSynthesis.cancel();
     clearTimeout(silenceTimer);
-
-    // Stop recording if still active
-    if (isRecording) {
-      console.log("Page unloading - stopping recording");
-      interviewComplete = true;
-      stopInterviewRecording();
-    }
-
-    // Clean up media streams
-    if (mediaStream) {
-      mediaStream.getTracks().forEach((track) => track.stop());
-    }
-    
-    // Clean up audio context
-    if (audioContext) {
-      audioContext.close();
-    }
+    if (isRecording) stopRecording();
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    if (audioContext) audioContext.close();
   });
 });

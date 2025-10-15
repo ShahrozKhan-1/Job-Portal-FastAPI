@@ -1,85 +1,440 @@
 {% extends 'base.html' %}
 
-{% block title %} Edit Job {% endblock %}
+{% block title %} Job Applications {% endblock %}
 
 {% block csslink %}
 <link rel="stylesheet" href="{{ url_for('static', path='css/getapplicants.css') }}">
 {% endblock %}
 
 {% block content %}
-
+<div class="col-md-9 col-lg-10">
     <!-- Main Content -->
-    <div class="col-md-10">
+    <div class="container-fluid">
         <div class="main-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h2 class="mb-1">Job Applications</h2>
-                    <p class="text-muted">Manage and review candidate applications</p>
+                    <h1 class="mb-2 fw-bold">Job Applications</h1>
+                    <p class="text-muted mb-0">Manage and review candidate applications</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill p-2">
+                            <i class="fas fa-users me-1"></i> {{ applicants|length }} Applications
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="filter-card">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control search-box" placeholder="Search applications...">
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select">
-                            <option>All Positions</option>
-                            <option>Frontend Developer</option>
-                            <option>Backend Developer</option>
-                            <option>UI/UX Designer</option>
-                            <option>Product Manager</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select">
-                            <option>All Status</option>
-                            <option>New</option>
-                            <option>Reviewed</option>
-                            <option>Shortlisted</option>
-                            <option>Rejected</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="date" class="form-control">
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-primary w-100">
-                            <i class="fas fa-filter me-2"></i>Filter
-                        </button>
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                {% set status_counts = {} %}
+                {% for applicant in applicants %}
+                {% if applicant.status not in status_counts %}
+                {% set _ = status_counts.update({applicant.status: 1}) %}
+                {% else %}
+                {% set _ = status_counts.update({applicant.status: status_counts[applicant.status] + 1}) %}
+                {% endif %}
+                {% endfor %}
+
+                <div class="col-md-3">
+                    <div class="stats-card bg-primary rounded-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-clock fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0 fw-bold">{{ status_counts.get('pending', 0) }}</h3>
+                                <p class="mb-0">Pending Review</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="stats-card bg-info rounded-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-eye fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0 fw-bold">{{ status_counts.get('reviewed', 0) }}</h3>
+                                <p class="mb-0">Reviewed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card bg-success rounded-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-star fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0 fw-bold">{{ status_counts.get('shortlisted', 0) }}</h3>
+                                <p class="mb-0">Shortlisted</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card bg-danger rounded-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-times-circle fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0 fw-bold">{{ status_counts.get('rejected', 0) }}</h3>
+                                <p class="mb-0">Rejected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server-side Filters -->
+            <div class="filter-card rounded-4 mb-4">
+                <form method="GET" action="{{ url_for('get_applicants') }}" class="row g-3 align-items-center">
+                    <div class="col-lg-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" name="search"
+                                value="{{ search_query or '' }}" placeholder="Search applications...">
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <select class="form-select" name="position">
+                            <option value="">All Positions</option>
+                            {% set unique_jobs = [] %}
+                            {% for applicant in applicants %}
+                            {% if applicant.job and applicant.job.title not in unique_jobs %}
+                            {% set _ = unique_jobs.append(applicant.job.title) %}
+                            <option value="{{ applicant.job.title }}" {% if position_query==applicant.job.title
+                                %}selected{% endif %}>
+                                {{ applicant.job.title }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <select class="form-select" name="status">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if status_query=='pending' %}selected{% endif %}>Pending</option>
+                            <option value="rejected" {% if status_query=='rejected' %}selected{% endif %}>Rejected
+                            </option>
+                            {% for status in status_counts.keys() %}
+                            {% if status not in ['pending', 'rejected'] %}
+                            <option value="{{ status }}" {% if status_query==status %}selected{% endif %}>
+                                {{ status|title }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <input type="date" class="form-control" name="date" value="{{ date_query or '' }}">
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                <i class="fas fa-filter me-2"></i>Filter
+                            </button>
+                            <a href="{{ url_for('get_applicants') }}" class="btn btn-outline-secondary rounded-pill">
+                                <i class="fas fa-refresh"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <!-- Applications List -->
             <div class="applications-list">
-                {% for applicant in applicants %}
-                <!-- Application 1 -->
-                <div class="application-card">
-                    <div class="row align-items-center d-flex justify-content-between">
-                        <a href="{{url_for('applicant_detail', applicant_id=applicant.id)}}" class="text-decoration-none col-md-4 d-flex">
-                            <div class="applicant-avatar me-5">JS</div>
-                            <div>
-                                <h6 class="mb-1"> {{applicant.user.name}} </h6>
-                                <p class="text-muted mb-0"> {{applicant.user.email}} </p>
-                                <small class="text-muted"> {{applicant.applied_time.strftime("%b %d, %Y")}} </small>
-                            </div>
-                        </a>
-                        <div class="col-md-3">
-                            <strong>{{applicant.job.title}}</strong><br>
-                            <small class="text-muted"> {{applicant.job.company}} </small><br>
-                            <small class="text-muted"> {{applicant.job.location}} </small>
+                {% set filtered_applicants = applicants %}
+
+                <!-- Apply search filter -->
+                {% if search_query %}
+                {% set search_term = search_query.lower() %}
+                {% set temp_filtered = [] %}
+                {% for applicant in filtered_applicants %}
+                {% if applicant.user and applicant.user.name and applicant.user.name.lower().find(search_term) != -1 %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif applicant.user and applicant.user.email and applicant.user.email.lower().find(search_term) != -1
+                %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif applicant.number and applicant.number.find(search_query) != -1 %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif applicant.job and applicant.job.title and applicant.job.title.lower().find(search_term) != -1 %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif applicant.job and applicant.job.company and applicant.job.company.lower().find(search_term) !=
+                -1 %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% endif %}
+                {% endfor %}
+                {% set filtered_applicants = temp_filtered %}
+                {% endif %}
+
+                <!-- Apply position filter -->
+                {% if position_query %}
+                {% set temp_filtered = [] %}
+                {% for applicant in filtered_applicants %}
+                {% if applicant.job and applicant.job.title == position_query %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% endif %}
+                {% endfor %}
+                {% set filtered_applicants = temp_filtered %}
+                {% endif %}
+
+                <!-- Apply status filter -->
+                {% if status_query %}
+                {% set temp_filtered = [] %}
+                {% for applicant in filtered_applicants %}
+                {% if applicant.status == status_query %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% endif %}
+                {% endfor %}
+                {% set filtered_applicants = temp_filtered %}
+                {% endif %}
+
+                <!-- Apply interview filter -->
+                {% if interview_query %}
+                {% set temp_filtered = [] %}
+                {% for applicant in filtered_applicants %}
+                {% if interview_query == 'has_interview' and applicant.interview %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif interview_query == 'no_interview' and not applicant.interview %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif interview_query == 'passed' and applicant.interview and applicant.interview.status == 'pass' %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% elif interview_query == 'failed' and applicant.interview and applicant.interview.status == 'fail' %}
+                {% set _ = temp_filtered.append(applicant) %}
+                {% endif %}
+                {% endfor %}
+                {% set filtered_applicants = temp_filtered %}
+                {% endif %}
+
+                <!-- Display filtered applications -->
+                {% for applicant in filtered_applicants %}
+                <div class="application-card rounded-4 mb-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-4">
+                            <a href="{{url_for('applicant_detail', applicant_id=applicant.id)}}"
+                                class="text-decoration-none d-flex align-items-center">
+                                <div class="applicant-avatar me-3">
+                                    {% if applicant.user and applicant.user.name %}
+                                    {{ applicant.user.name.split() | map('first') | join }}
+                                    {% else %}
+                                    {{ applicant.email[0] | upper if applicant.email else 'U' }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 fw-semibold">
+                                        {% if applicant.user and applicant.user.name %}
+                                        {{ applicant.user.name }}
+                                        {% else %}
+                                        {{ applicant.email if applicant.email else 'Unknown User' }}
+                                        {% endif %}
+                                    </h6>
+                                    <p class="text-muted mb-1 small">{{ applicant.user.email if applicant.user and
+                                        applicant.user.email else applicant.email }}</p>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted">
+                                            <i class="far fa-clock me-1"></i>
+                                            {{ applicant.applied_time.strftime("%b %d, %Y") }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
-                        <div class="col-md-2">
-                            <a href="{{url_for('get_applicant_interview_results', applicant_id=applicant.id)}}" class="btn btn-outline-primary">Check Interview</a>
+                        <div class="col-lg-2">
+                            <div class="d-flex flex-column">
+                                <strong class="mb-1">{{ applicant.job.title if applicant.job else 'No Job' }}</strong>
+                                {% if applicant.job %}
+                                <small class="text-muted">
+                                    <i class="fas fa-building me-1"></i>{{ applicant.job.company if
+                                    applicant.job.company else 'N/A' }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ applicant.job.location if
+                                    applicant.job.location else 'Remote' }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <span class="status-badge status-{{ applicant.status }} rounded-pill px-3 py-1">
+                                <i class="fas fa-circle me-1 small"></i>{{ applicant.status|title }}
+                            </span>
+                            {% if applicant.interview %}
+                            <div class="mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-video me-1"></i>
+                                    {% if applicant.interview.status %}
+                                    {{ applicant.interview.status|title }}
+                                    {% else %}
+                                    Completed
+                                    {% endif %}
+                                </small>
+                                {% if applicant.interview.score %}
+                                <small class="text-muted d-block">
+                                    Score: {{ "%.1f"|format(applicant.interview.score) }}/10
+                                </small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="d-flex gap-2 justify-content-end">
+                                {% if applicant.interview %}
+                                <a href="{{url_for('get_applicant_interview_results', applicant_id=applicant.id)}}"
+                                    class="btn btn-outline-primary rounded-pill">
+                                    <i class="fas fa-clipboard-check me-2"></i>View Interview
+                                </a>
+                                {% else %}
+                                <button class="btn btn-outline-secondary rounded-pill" disabled>
+                                    <i class="fas fa-video-slash me-2"></i>No Interview
+                                </button>
+                                {% endif %}
+
+                                {% if applicant.resume %}
+                                <a href="{{ applicant.resume }}" target="_blank"
+                                    class="btn btn-outline-success rounded-pill">
+                                    <i class="fas fa-file-pdf me-2"></i>Resume
+                                </a>
+                                {% else %}
+                                <button class="btn btn-outline-secondary rounded-pill" disabled>
+                                    <i class="fas fa-file-pdf me-2"></i>No Resume
+                                </button>
+                                {% endif %}
+
+                                <div class="dropdown">
+                                    <button class="btn btn-light rounded-circle" type="button"
+                                        data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="{{url_for('applicant_detail', applicant_id=applicant.id)}}">
+                                                <i class="fas fa-eye me-2"></i>View Details
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#"
+                                                onclick="updateStatus('{{ applicant.id }}', 'reviewed')">
+                                                <i class="fas fa-check me-2"></i>Mark Reviewed
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#"
+                                                onclick="updateStatus('{{ applicant.id }}', 'shortlisted')">
+                                                <i class="fas fa-star me-2"></i>Shortlist
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#"
+                                                onclick="updateStatus('{{ applicant.id }}', 'rejected')">
+                                                <i class="fas fa-times me-2"></i>Reject
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-info"
+                                                href="mailto:{{ applicant.user.email if applicant.user and applicant.user.email else applicant.email }}">
+                                                <i class="fas fa-envelope me-2"></i>Send Email
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">
+                        {% if search_query or position_query or status_query or interview_query %}
+                        No applications match your filters
+                        {% else %}
+                        No Applications Yet
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted">
+                        {% if search_query or position_query or status_query or interview_query %}
+                        Try adjusting your search criteria
+                        {% else %}
+                        When candidates apply to your jobs, they'll appear here.
+                        {% endif %}
+                    </p>
+                    {% if search_query or position_query or status_query or interview_query %}
+                    <a href="{{ url_for('get_applicants') }}" class="btn btn-primary rounded-pill">
+                        <i class="fas fa-refresh me-2"></i>Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
                 {% endfor %}
+            </div>
+
+            <!-- Results Counter -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    Showing {{ filtered_applicants|length }} of {{ applicants|length }} entries
+                    {% if search_query or position_query or status_query or interview_query %}
+                    <span class="text-primary">(Filtered)</span>
+                    {% endif %}
+                </div>
+
+                <!-- Pagination -->
+                {% if filtered_applicants %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateStatus(applicantId, status) {
+        if (confirm('Are you sure you want to update this application status?')) {
+            fetch(`/update-applicant-status/${applicantId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: status })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error updating status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status');
+                });
+        }
+    }
+</script>
 {% endblock %}

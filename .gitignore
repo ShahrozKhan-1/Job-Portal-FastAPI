@@ -1,4 +1,4 @@
 env/
 .env
-linkedin_jobs
-rozee_jobs_today
+linkedin_jobs.csv
+rozee_jobs_today.csv

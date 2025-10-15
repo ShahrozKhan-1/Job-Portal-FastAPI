@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}">
 
 </head>
+
 <body>
     <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
@@ -19,36 +21,34 @@
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <button 
-                    class="btn text-dark dropdown-toggle d-flex align-items-center" 
-                    type="button" 
-                    id="userDropdown"
-                    data-bs-toggle="dropdown" 
-                    aria-expanded="false">
-                    <i class="fa-regular fa-user me-2"></i> 
-                    <small>{{ current_user.name }}</small>
+                    <button class="btn text-dark dropdown-toggle d-flex align-items-center" type="button"
+                        id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-user me-2"></i>
+                        <small>{{ current_user.name }}</small>
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li>
-                        <a class="dropdown-item" href="{{ url_for('get_profile') }}">
-                        <i class="fas fa-user me-2"></i>Profile
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#">
-                        <i class="fas fa-cog me-2"></i>Settings
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item" href="{{ url_for('logout') }}">
-                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                        </a>
-                    </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('get_profile') }}">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </li>
                     </ul>
                 </div>
-                </div>
+            </div>
 
         </div>
     </nav>
@@ -61,43 +61,71 @@
                     <div class="p-3">
                         <h6 class="text-white mb-3">Navigation</h6>
                         <nav class="nav flex-column">
-                            <a class="nav-link {% if request.url.path == '/dashboard' %}active{% endif %}" href=" {{url_for('dashboard')}} "><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                            <a class="nav-link {% if request.url.path == '/dashboard' %}active{% endif %}"
+                                href=" {{url_for('dashboard')}} "><i
+                                    class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
                             {% if current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/add-job' %}active{% endif %}" href=" {{url_for('add_job')}} "><i class="fas fa-plus me-2"></i>Add Job</a>
+                            <a class="nav-link {% if request.url.path=='/add-job' %}active{% endif %}"
+                                href=" {{url_for('add_job')}} "><i class="fas fa-plus me-2"></i>Add Job</a>
                             {% endif %}
-                            <a class="nav-link {% if request.url.path=='/search' %}active{% endif %}" href="{{url_for('get_search')}}"><i class="fas fa-search me-2"></i>Find Jobs</a>
-                            <a class="nav-link {% if request.url.path=='/saved-job' %}active{% endif %}" href=" {{url_for('saved_job')}} "><i class="fas fa-bookmark me-2"></i>Saved Jobs</a>
+                            <a class="nav-link {% if request.url.path=='/search' %}active{% endif %}"
+                                href="{{url_for('get_search')}}"><i class="fas fa-search me-2"></i>Find Jobs</a>
+                            <a class="nav-link {% if request.url.path=='/saved-job' %}active{% endif %}"
+                                href=" {{url_for('saved_job')}} "><i class="fas fa-bookmark me-2"></i>Saved Jobs</a>
                             {% if current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/get-applicant' %}active{% endif %}" href=" {{url_for('get_applicants')}} "><i class="fas fa-paper-plane me-2"></i>Recieved Applications</a>
+                            <a class="nav-link {% if request.url.path=='/get-applicant' %}active{% endif %}"
+                                href=" {{url_for('get_applicants')}} "><i class="fas fa-paper-plane me-2"></i>Recieved
+                                Applications</a>
                             {% endif %}
                             {% if not current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/application-sent' %}active{% endif %}" href=" {{url_for('application_sent')}} "><i class="fas fa-paper-plane me-2"></i>Sent Applications</a>
+                            <a class="nav-link {% if request.url.path=='/application-sent' %}active{% endif %}"
+                                href=" {{url_for('application_sent')}} "><i class="fas fa-paper-plane me-2"></i>Sent
+                                Applications</a>
                             {% endif %}
-                            <a class="nav-link {% if request.url.path=='/profile' %}active{% endif %}" href="{{url_for('get_profile')}}"><i class="fas fa-user-tie me-2"></i>Profile</a>
+                            <a class="nav-link {% if request.url.path=='/profile' %}active{% endif %}"
+                                href="{{url_for('get_profile')}}"><i class="fas fa-user-tie me-2"></i>Profile</a>
                             {% if not current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/applicant-self-check' %}active{% endif %}" href=" {{url_for('applicant_self_check')}} "><i class="fas fa-paper-plane me-2"></i>Resume Check</a>
+                            <a class="nav-link {% if request.url.path=='/applicant-self-check' %}active{% endif %}"
+                                href=" {{url_for('applicant_self_check')}} "><i
+                                    class="fas fa-paper-plane me-2"></i>Resume Check</a>
                             {% endif %}
                             {% if not current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/all-public-interviews' %}active{% endif %}" href=" {{url_for('all_public_interview')}} ">Public Interviews</a>
+                            <a class="nav-link {% if request.url.path=='/all-public-interviews' %}active{% endif %}"
+                                href=" {{url_for('all_public_interview')}} ">Public Interviews</a>
                             {% endif %}
                             {% if current_user.is_recruiter %}
-                            <a class="nav-link {% if request.url.path=='/recruiter-public-interview' %}active{% endif %}" href=" {{url_for('recruiter_public_interview')}} ">Create Public Interviews</a>
+                            <a class="nav-link {% if request.url.path=='/recruiter-public-interview' %}active{% endif %}"
+                                href=" {{url_for('recruiter_public_interview')}} ">Create Public Interviews</a>
                             {% endif %}
                         </nav>
                     </div>
                 </div>
             </div>
             {% block content %} {% endblock %}
-            
+
         </div>
     </div>
     <div>
         <h1 class="notifications"></h1>
     </div>
 
-
+    {% if message %}
+    <div id="toast-message" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        <div class="toast align-items-center text-bg-primary border-0 show" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% block jslink %} {% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

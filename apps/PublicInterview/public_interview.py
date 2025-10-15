@@ -67,7 +67,7 @@ async def edit_public_interview(
         db_interview.category = interview.category
         db.commit()
         db.refresh(db_interview)
-        return RedirectResponse(url="/user-public-interview", headers={"success":"Public Interview Added Successfully"}, status_code=302)
+        return RedirectResponse(url="/recruiter-public-interview", headers={"success":"Public Interview Added Successfully"}, status_code=302)
 
 
 @public_interview_router.get("/delete-public-interview/{interview_id}")
