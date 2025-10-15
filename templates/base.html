@@ -61,7 +61,7 @@
                     <div class="p-3">
                         <h6 class="text-white mb-3">Navigation</h6>
                         <nav class="nav flex-column">
-                            <a class="nav-link {% if request.url.path == '/' %}active{% endif %}" href=" {{url_for('dashboard')}} "><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                            <a class="nav-link {% if request.url.path == '/dashboard' %}active{% endif %}" href=" {{url_for('dashboard')}} "><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
                             {% if current_user.is_recruiter %}
                             <a class="nav-link {% if request.url.path=='/add-job' %}active{% endif %}" href=" {{url_for('add_job')}} "><i class="fas fa-plus me-2"></i>Add Job</a>
                             {% endif %}

@@ -29,12 +29,12 @@ load_dotenv()
 dashboard_router = APIRouter()
 
 
-@dashboard_router.get("/landing-page")
+@dashboard_router.get("/")
 async def landing_page(request:Request):
     return templates.TemplateResponse("landingpage.html", {"request":request})
 
 
-@dashboard_router.get("/", response_model=list[JobResponse])
+@dashboard_router.get("/dashboard", response_model=list[JobResponse])
 async def dashboard(request:Request, 
     current_user: str = Depends(get_current_user),
     db:Session=Depends(get_db)
@@ -102,7 +102,7 @@ async def add_job(
         db.commit()
         db.refresh(new_job)
         return new_job
-    return RedirectResponse(url="/", headers={"success":"Job Added Successfully"}, status_code=302)
+    return RedirectResponse(url="/dashboard", headers={"success":"Job Added Successfully"}, status_code=302)
 
 
 @dashboard_router.get("/delete-job/{job_id}")
@@ -115,7 +115,7 @@ async def delete_job(job_id:int, db:Session=Depends(get_db), current_user=Depend
             return JSONResponse({"message":"Can not delete the job"})
         db.delete(delete_job)
         db.commit()
-    return RedirectResponse(url="/", headers={"success":"Job Deleted Successfully"}, status_code=302)
+    return RedirectResponse(url="/dashboard", headers={"success":"Job Deleted Successfully"}, status_code=302)
 
 
 @dashboard_router.get("/edit-job/{job_id}")
@@ -159,7 +159,7 @@ async def put_edit_job(
         db_job.salary=job.salary
         db.commit()
         db.refresh(db_job)
-        return RedirectResponse(url="/", headers={"success":"Job Edited Successfully"}, status_code=302)
+        return RedirectResponse(url="/dashboard", headers={"success":"Job Edited Successfully"}, status_code=302)
     return JSONResponse({"message":"Only recruiter can edit job"})
 
 
@@ -215,7 +215,7 @@ async def apply_job(
     db.add(applicant)
     db.commit()
     db.refresh(applicant)
-    return RedirectResponse(url="/", headers={"success":"Job Applied Successfully"}, status_code=302)
+    return RedirectResponse(url="/dashboard", headers={"success":"Job Applied Successfully"}, status_code=302)
 
 
 @dashboard_router.get("/get-applicant", response_model=List[ApplicantResponse])
@@ -321,7 +321,7 @@ async def save_job(
     db.add(save_job)
     db.commit()
     db.refresh(save_job)
-    return RedirectResponse(url="/", headers={"success": "Job Saved Successfully"}, status_code=302)
+    return RedirectResponse(url="/dashboard", headers={"success": "Job Saved Successfully"}, status_code=302)
 
 
 @dashboard_router.get("/saved-job", response_model=List[SaveJobResponse])
@@ -536,7 +536,7 @@ async def created_jobs(
             "current_user": current_user,
             "jobs": jobs
         })
-    return RedirectResponse(url="/", status_code=302)
+    return RedirectResponse(url="/dashboard", status_code=302)
 
 
 @dashboard_router.post('/scrap_rozeepk')

@@ -53,7 +53,7 @@ async def post_login(user:LoginUser, request: Request, db: Session = Depends(get
     if not verify_password(user.password, existed_user.password):
         return JSONResponse(status_code=400, content={"error": "Incorrect Password"})
     access_token = create_access_token(data={"sub": existed_user.email}, expires_delta=timedelta(minutes = ACCESS_TOKEN_EXPIRY_MINUTES))
-    response = RedirectResponse(url="/", status_code=302)
+    response = RedirectResponse(url="/dashboard", status_code=302)
     response.set_cookie(
     key="access_token",
     value=access_token, 
@@ -64,7 +64,7 @@ async def post_login(user:LoginUser, request: Request, db: Session = Depends(get
 
 @auth_router.get("/logout")
 async def logout():
-    response = RedirectResponse(url="/login", status_code=302)
+    response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie("access_token")
     return response
 

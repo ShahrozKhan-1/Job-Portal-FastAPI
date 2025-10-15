@@ -13,7 +13,7 @@ from config import Config
 
 SECRET_KEY = str(Config.SECRET_KEY)
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRY_MINUTES = 120
+ACCESS_TOKEN_EXPIRY_MINUTES = 10080
 
 security = HTTPBearer()
 
@@ -45,13 +45,13 @@ def create_access_token(data:dict, expires_delta:timedelta):
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        raise HTTPException(status_code=302, headers={"Location": "/login"})
+        raise HTTPException(status_code=302, headers={"Location": "/landing-page"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=302, headers={"Location": "/login"})
+        raise HTTPException(status_code=302, headers={"Location": "/landing-page"})
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token", headers={"Location": "/landing-page"})
     email = payload.get("sub")
     if not email:
         raise HTTPException(status_code=401, detail="Invalid token payload")

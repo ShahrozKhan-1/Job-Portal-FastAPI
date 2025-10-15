@@ -348,7 +348,7 @@ function connectWebSocket() {
     stopVideoRecording();
 
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     }, 5000);
   };
 
