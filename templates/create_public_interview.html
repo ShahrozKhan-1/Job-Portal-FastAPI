@@ -11,7 +11,7 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <div class="card card-custom">
+        <div class="card card-custom fade-in">
           <div class="card-header card-header-custom">
             <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Public Interview</h4>
           </div>
@@ -20,11 +20,11 @@
             <div class="step-indicator">
               <div class="step active">
                 <div class="step-number">1</div>
-                <div class="step-label">Basic Info</div>
+                <div class="step-label">Role & Skills</div>
               </div>
               <div class="step">
                 <div class="step-number">2</div>
-                <div class="step-label">Questions</div>
+                <div class="step-label">Details</div>
               </div>
               <div class="step">
                 <div class="step-number">3</div>
@@ -34,95 +34,158 @@
 
             <!-- Interview Form -->
             <form id="interviewForm">
-              <!-- Step 1: Basic Information -->
+              <!-- Step 1: Role & Skills -->
               <div id="step1">
-                <h5 class="mb-4 text-primary">Basic Information</h5>
+                <div class="form-section">
+                  <h5 class="section-title">🎯 Target Role & Skills</h5>
+                  
+                  <div class="row">
+                    <div class="col-md-8 mb-4">
+                      <label for="title" class="form-label">
+                        Interview Title <span class="required-star">*</span>
+                        <i class="fas fa-question-circle tooltip-icon" title="A descriptive title that candidates will see"></i>
+                      </label>
+                      <input type="text" class="form-control" id="title" name="title" required maxlength="255"
+                        placeholder="e.g., Senior Python Developer Technical Interview">
+                      <div class="character-count">
+                        <span id="titleCount">0</span>/255 characters
+                      </div>
+                    </div>
 
-                <div class="row">
-                  <div class="col-md-8 mb-3">
-                    <label for="title" class="form-label">Interview Title <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="title" name="title" required maxlength="255"
-                      placeholder="Enter a descriptive title for your interview">
-                    <div class="form-text">Maximum 255 characters</div>
+                    <div class="col-md-4 mb-4">
+                      <label for="role" class="form-label">
+                        Target Role
+                        <i class="fas fa-question-circle tooltip-icon" title="The specific job role this interview targets"></i>
+                      </label>
+                      <input type="text" class="form-control" id="role" name="role" maxlength="255"
+                        placeholder="e.g., Senior Python Developer">
+                    </div>
                   </div>
 
-                  <div class="col-md-4 mb-3">
-                    <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category">
-                      <option value="">Select a category</option>
-                      <option value="Technical">Technical</option>
-                      <option value="Behavioral">Behavioral</option>
-                      <option value="Management">Management</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Customer Service">Customer Service</option>
-                      <option value="Other">Other</option>
-                    </select>
+                  <div class="mb-4">
+                    <label for="skillsInput" class="form-label">
+                      Required Skills
+                      <i class="fas fa-question-circle tooltip-icon" title="Add skills that candidates should have"></i>
+                    </label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="skillsInput" 
+                        placeholder="e.g., Python, Django, PostgreSQL, AWS">
+                      <button type="button" class="btn btn-primary-custom" id="addSkill">
+                        <i class="fas fa-plus me-1"></i> Add
+                      </button>
+                    </div>
+                    <div class="form-text">Press Enter or click Add to include skills</div>
+                    
+                    <div class="skills-tags" id="skillsContainer">
+                      <!-- Skills will be added here dynamically -->
+                    </div>
+                    <input type="hidden" id="skills" name="skills">
                   </div>
                 </div>
 
-                <div class="mb-3">
-                  <label for="description" class="form-label">Description</label>
-                  <textarea class="form-control" id="description" name="description" rows="4"
-                    placeholder="Provide a detailed description of this interview (optional)"></textarea>
-                </div>
-
-                <div class="d-flex justify-content-end mt-4">
-                  <button type="button" class="btn btn-primary-custom px-4" id="nextToStep2">Next <i
-                      class="fas fa-arrow-right ms-2"></i></button>
+                <div class="d-flex justify-content-end">
+                  <button type="button" class="btn btn-primary-custom px-4" id="nextToStep2">
+                    Next <i class="fas fa-arrow-right ms-2"></i>
+                  </button>
                 </div>
               </div>
 
-              <!-- Step 2: Questions -->
+              <!-- Step 2: Details -->
               <div id="step2" style="display: none;">
-                <h5 class="mb-4 text-primary">Interview Questions</h5>
-                <p class="text-muted mb-4">Add simple text questions for your interview.</p>
+                <div class="form-section">
+                  <h5 class="section-title">📝 Interview Details</h5>
 
-                <div id="questionList">
-                  <!-- JS will add <input> elements here -->
+                  <div class="row">
+                    <div class="col-md-6 mb-4">
+                      <label for="category" class="form-label">
+                        Category
+                        <i class="fas fa-question-circle tooltip-icon" title="Category helps in organizing your interviews"></i>
+                      </label>
+                      <select class="form-select" id="category" name="category">
+                        <option value="">Select a category</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Behavioral">Behavioral</option>
+                        <option value="Management">Management</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Customer Service">Customer Service</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="mb-4">
+                    <label for="description" class="form-label">
+                      Description
+                      <i class="fas fa-question-circle tooltip-icon" title="Detailed description about the interview process"></i>
+                    </label>
+                    <textarea class="form-control" id="description" name="description" rows="5"
+                      placeholder="Describe what candidates can expect in this interview, the format, duration, and any important information..."></textarea>
+                    <div class="character-count">
+                      <span id="descriptionCount">0</span> characters
+                    </div>
+                  </div>
                 </div>
 
-                <div class="d-flex justify-content-between mt-4">
+                <div class="d-flex justify-content-between">
                   <button type="button" class="btn btn-outline-primary-custom" id="backToStep1">
                     <i class="fas fa-arrow-left me-2"></i> Back
                   </button>
-                  <div>
-                    <button type="button" class="btn btn-outline-secondary me-2" id="addQuestion">
-                      <i class="fas fa-plus me-2"></i> Add Question
-                    </button>
-                    <button type="button" class="btn btn-primary-custom px-4" id="nextToStep3">
-                      Next <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
-                  </div>
+                  <button type="button" class="btn btn-primary-custom px-4" id="nextToStep3">
+                    Next <i class="fas fa-arrow-right ms-2"></i>
+                  </button>
                 </div>
               </div>
 
               <!-- Step 3: Review -->
               <div id="step3" style="display: none;">
-                <h5 class="mb-4 text-primary">Review Interview</h5>
-                <p class="text-muted mb-4">Review your interview details before publishing.</p>
+                <div class="form-section">
+                  <h5 class="section-title">👁️ Review Interview</h5>
+                  <p class="text-muted mb-4">Please review all details before publishing your interview.</p>
 
-                <div class="preview-box mb-4">
-                  <h6 class="text-primary">Basic Information</h6>
-                  <p><strong>Title:</strong> <span id="previewTitle"></span></p>
-                  <p><strong>Category:</strong> <span id="previewCategory"></span></p>
-                  <p><strong>Description:</strong> <span id="previewDescription"></span></p>
-                </div>
+                  <div class="preview-box mb-4">
+                    <h6 class="text-primary mb-3">🎯 Role & Skills</h6>
+                    <div class="preview-item">
+                      <div class="preview-label">Interview Title</div>
+                      <div class="preview-value" id="previewTitle"></div>
+                    </div>
+                    <div class="preview-item">
+                      <div class="preview-label">Target Role</div>
+                      <div class="preview-value" id="previewRole"></div>
+                    </div>
+                    <div class="preview-item">
+                      <div class="preview-label">Required Skills</div>
+                      <div class="skills-preview" id="previewSkills"></div>
+                    </div>
+                  </div>
 
-                <div class="preview-box mb-4">
-                  <h6 class="text-primary">Questions</h6>
-                  <div id="previewQuestions"></div>
-                </div>
+                  <div class="preview-box mb-4">
+                    <h6 class="text-primary mb-3">📝 Details</h6>
+                    <div class="preview-item">
+                      <div class="preview-label">Category</div>
+                      <div class="preview-value" id="previewCategory"></div>
+                    </div>
+                    <div class="preview-item">
+                      <div class="preview-label">Description</div>
+                      <div class="preview-value" id="previewDescription"></div>
+                    </div>
+                  </div>
 
-                <div class="preview-box mb-3">
-                  <h6 class="text-primary">Interview Status</h6>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="statusToggle" checked />
-                    <label class="form-check-label" for="statusToggle">Interview is
-                      <strong id="statusLabel">Open</strong></label>
+                  <div class="preview-box">
+                    <h6 class="text-primary mb-3">⚙️ Settings</h6>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="statusToggle" checked style="transform: scale(1.2);"/>
+                      <label class="form-check-label" for="statusToggle">
+                        Interview Status: 
+                        <span id="statusLabel" class="status-badge status-active ms-2">Active</span>
+                      </label>
+                    </div>
+                    <div class="form-text mt-2">
+                      Active interviews are visible to candidates. You can change this later.
+                    </div>
                   </div>
                 </div>
 
-                <div class="d-flex justify-content-between mt-4">
+                <div class="d-flex justify-content-between">
                   <button type="button" class="btn btn-outline-primary-custom" id="backToStep2">
                     <i class="fas fa-arrow-left me-2"></i> Back
                   </button>
@@ -132,7 +195,6 @@
                 </div>
               </div>
             </form>
-
           </div>
         </div>
       </div>

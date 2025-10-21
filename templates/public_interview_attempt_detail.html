@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}My Public Interviews{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">{{ interview.title }}</h1>
+                        <p class="text-muted mb-0">Candidate: {{ user.name }}</p>
+                    </div>
+                    <a href="/public-interview-results/{{ interview.id }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Results
+                    </a>
+                </div>
+
+                <div class="row">
+                    <!-- Left Column - Candidate Info & Resume -->
+                    <div class="col-lg-4 mb-4">
+                        <!-- Candidate Info -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Candidate Information</h5>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small mb-1">Name</label>
+                                    <p class="mb-2">{{ user.name }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small mb-1">Email</label>
+                                    <p class="mb-2">{{ user.email }}</p>
+                                </div>
+                                <div>
+                                    <label class="form-label text-muted small mb-1">Attempt Date</label>
+                                    <p class="mb-0">{{ attempt.attempted_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score & Feedback -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Evaluation</h5>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small mb-1">Score</label>
+                                    <div>
+                                        {% if attempt.score is not none %}
+                                        <span class="h4 text-primary fw-bold">{{ "%.1f"|format(attempt.score) }}%</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Not evaluated yet</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="form-label text-muted small mb-1">Feedback</label>
+                                    {% if attempt.feedback %}
+                                    <p class="text-break">{{ attempt.feedback }}</p>
+                                    {% else %}
+                                    <p class="text-warning small mb-0">No feedback provided yet</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resume -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Resume</h5>
+                                <a href="{{ attempt.resume }}" target="_blank"
+                                    class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    View Resume PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Video & Questions -->
+                    <div class="col-lg-8">
+                        <!-- Interview Video -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Interview Recording</h5>
+                                {% if attempt.video %}
+                                <div class="ratio ratio-16x9 bg-dark rounded">
+                                    <video controls class="rounded"
+                                        poster="https://via.placeholder.com/800x450?text=Interview+Video">
+                                        <source src="{{ attempt.video }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-5 bg-light rounded">
+                                    <i class="fas fa-video-slash fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-muted">No video recording</h6>
+                                    <p class="text-muted small mb-0">Video was not recorded for this attempt.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Questions & Answers -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Questions & Answers</h5>
+                                <div class="questions-container">
+                                    {% if interview.questions %}
+                                    {% for question in interview.questions %}
+                                    <div class="border-start border-primary border-3 ps-3 py-2 mb-4">
+                                        <h6 class="fw-medium mb-2">Question {{ loop.index }}</h6>
+                                        <p class="text-muted mb-3">{{ question }}</p>
+                                        {% if attempt.answers and attempt.answers[loop.index0] %}
+                                        <div
+                                            class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded p-3">
+                                            <label class="form-label text-success small fw-medium mb-1">Candidate's
+                                                Answer:</label>
+                                            <p class="text-success mb-0">{{ attempt.answers[loop.index0] }}</p>
+                                        </div>
+                                        {% else %}
+                                        <div
+                                            class="bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded p-3">
+                                            <p class="text-warning mb-0">No answer provided for this question.</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <div class="text-center py-4">
+                                        <p class="text-muted">No questions available for this interview.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .questions-container .border-start {
+        border-left-width: 4px !important;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .card-title {
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+</style>
+{% endblock %}

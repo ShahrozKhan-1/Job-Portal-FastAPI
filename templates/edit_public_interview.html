@@ -6,146 +6,554 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Public Interview</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    :root {
+      --primary-blue: #1e6fba;
+      --secondary-blue: #3498db;
+      --light-blue: #e8f4fc;
+      --dark-blue: #0d4a7a;
+      --white: #ffffff;
+      --light-gray: #f8f9fa;
+      --success-green: #28a745;
+      --warning-orange: #ffc107;
+      --danger-red: #dc3545;
+    }
+
     body {
-      background: #f8f9fa;
-      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e8f4fc 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px 0;
     }
 
     .container {
-      max-width: 700px;
+      max-width: 800px;
       background: white;
-      padding: 30px;
-      margin-top: 50px;
-      border-radius: 15px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 0;
+      margin-top: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
     }
 
-    .btn-custom {
-      background-color: #007bff;
+    .card-header-custom {
+      background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
       color: white;
-      border-radius: 25px;
-      padding: 10px 25px;
+      padding: 25px 30px;
+      border-bottom: none;
     }
 
-    .btn-custom:hover {
-      background-color: #0056b3;
+    .card-body {
+      padding: 30px;
+    }
+
+    .form-section {
+      background-color: var(--light-gray);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+
+    .section-title {
+      color: var(--dark-blue);
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--light-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title i {
+      color: var(--secondary-blue);
+    }
+
+    .btn-primary-custom {
+      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(30, 111, 186, 0.3);
+    }
+
+    .btn-outline-primary-custom {
+      border: 2px solid var(--primary-blue);
+      color: var(--primary-blue);
+      background: transparent;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary-custom:hover {
+      background-color: var(--primary-blue);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .form-control,
+    .form-select {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 12px 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--secondary-blue);
+      box-shadow: 0 0 0 0.3rem rgba(52, 152, 219, 0.15);
+    }
+
+    .skills-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .skill-tag {
+      background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .skill-tag .remove-skill {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
+    }
+
+    .skill-tag .remove-skill:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-inactive {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--success-green);
+      border-color: var(--success-green);
+    }
+
+    .form-check-input {
+      width: 3em;
+      height: 1.5em;
+    }
+
+    .character-count {
+      font-size: 0.8rem;
+      color: #6c757d;
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    .character-count.warning {
+      color: var(--warning-orange);
+    }
+
+    .character-count.danger {
+      color: var(--danger-red);
+    }
+
+    .preview-box {
+      background: linear-gradient(135deg, #f8f9fa, var(--light-blue));
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 15px;
+      border-left: 4px solid var(--secondary-blue);
+    }
+
+    .preview-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .preview-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .preview-label {
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 5px;
+    }
+
+    .preview-value {
+      color: #495057;
+      line-height: 1.5;
+    }
+
+    .skills-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .skill-preview-tag {
+      background-color: var(--secondary-blue);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h3 class="text-center text-primary mb-4">Edit Public Interview</h3>
-
-    <form id="editInterviewForm">
-      <div class="mb-3">
-        <label class="form-label">Title</label>
-        <input type="text" id="title" class="form-control" value="{{interview.title}}" required />
+  <div class="container fade-in">
+    <!-- Header -->
+    <div class="card-header-custom">
+      <div class="d-flex align-items-center">
+        <i class="fas fa-edit fa-2x me-3"></i>
+        <div>
+          <h4 class="mb-1">Edit Public Interview</h4>
+          <p class="mb-0 opacity-75">Update your interview details and settings</p>
+        </div>
       </div>
+    </div>
 
-      <div class="mb-3">
-        <label class="form-label">Category</label>
-        <input type="text" id="category" class="form-control" value="{{interview.category}}" />
-      </div>
+    <!-- Form -->
+    <div class="card-body">
+      <form id="editInterviewForm">
+        <!-- Role & Skills Section -->
+        <div class="form-section">
+          <h5 class="section-title">
+            <i class="fas fa-bullseye"></i>
+            Target Role & Skills
+          </h5>
 
-      <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea id="description" class="form-control" rows="3">{{interview.description}}</textarea>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Status</label>
-        <select id="status" class="form-select" name="status">
-          <option value="true" {% if interview.status == True %}selected{% endif %}>Open</option>
-          <option value="false" {% if interview.status == False %}selected{% endif %}>Closed</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Questions</label>
-        <div id="questionsContainer">
-          {% if interview.questions %}
-            {% for question in interview.questions %}
-              <div class="question-item input-group mb-2">
-                <input
-                  type="text"
-                  class="form-control question-input" 
-                  value="{{ question }}"
-                  placeholder="Enter question"
-                />
+          <div class="row">
+            <div class="col-md-8 mb-4">
+              <label for="title" class="form-label fw-semibold">
+                Interview Title <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="title" value="{{ interview.title }}" required
+                maxlength="255" />
+              <div class="character-count">
+                <span id="titleCount">{{ interview.title|length }}</span>/255 characters
               </div>
-            {% endfor %}
-          {% endif %}
+            </div>
+
+            <div class="col-md-4 mb-4">
+              <label for="role" class="form-label fw-semibold">Target Role</label>
+              <input type="text" class="form-control" id="role" value="{{ interview.role or '' }}" maxlength="255"
+                placeholder="e.g., Senior Python Developer" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="skillsInput" class="form-label fw-semibold">Required Skills</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="skillsInput"
+                placeholder="e.g., Python, Django, PostgreSQL, AWS" />
+              <button type="button" class="btn btn-primary-custom" id="addSkill">
+                <i class="fas fa-plus me-1"></i> Add
+              </button>
+            </div>
+            <div class="form-text">Type a skill and press Enter or click Add</div>
+
+            <div class="skills-tags" id="skillsContainer">
+              <!-- Skills will be populated by JavaScript -->
+            </div>
+            <input type="hidden" id="skills" name="skills" />
+          </div>
         </div>
 
-        <button type="button" class="btn btn-outline-primary mt-2" id="addQuestionBtn">
-          + Add Question
-        </button>
-      </div>
+        <!-- Details Section -->
+        <div class="form-section">
+          <h5 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Interview Details
+          </h5>
 
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label for="category" class="form-label fw-semibold">Category</label>
+              <select class="form-select" id="category" name="category">
+                <option value="">Select a category</option>
+                <option value="Technical" {% if interview.category=="Technical" %}selected{% endif %}>Technical</option>
+                <option value="Behavioral" {% if interview.category=="Behavioral" %}selected{% endif %}>Behavioral
+                </option>
+                <option value="Management" {% if interview.category=="Management" %}selected{% endif %}>Management
+                </option>
+                <option value="Sales" {% if interview.category=="Sales" %}selected{% endif %}>Sales</option>
+                <option value="Customer Service" {% if interview.category=="Customer Service" %}selected{% endif %}>
+                  Customer Service</option>
+                <option value="Other" {% if interview.category=="Other" %}selected{% endif %}>Other</option>
+              </select>
+            </div>
 
-      <button type="submit" class="btn btn-custom w-100">Update Interview</button>
-    </form>
+            <div class="col-md-6 mb-4">
+              <label class="form-label fw-semibold">Interview Status</label>
+              <div class="d-flex align-items-center">
+                <div class="form-check form-switch me-3">
+                  <input class="form-check-input" type="checkbox" id="statusToggle" {% if interview.status==True
+                    %}checked{% endif %} />
+                </div>
+                <span id="statusLabel"
+                  class="status-badge {% if interview.status %}status-active{% else %}status-inactive{% endif %}">
+                  {% if interview.status %}Active{% else %}Inactive{% endif %}
+                </span>
+              </div>
+              <div class="form-text mt-1">
+                Active interviews are visible to candidates
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label fw-semibold">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+              placeholder="Describe what candidates can expect in this interview...">{{ interview.description or '' }}</textarea>
+            <div class="character-count">
+              <span id="descriptionCount">{{ (interview.description or '')|length }}</span> characters
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <a href="/recruiter/dashboard" class="btn btn-outline-primary-custom">
+            <i class="fas fa-arrow-left me-2"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-primary-custom">
+            <i class="fas fa-check me-2"></i> Update Interview
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="d-none" id="interview_id">{{interview.id}}</div>
-  
+
+  <!-- Interview ID (hidden) -->
+  <div class="d-none" id="interview_id">{{ interview.id }}</div>
+  <div class="d-none" id="initial_skills">{{ (interview.skills or [])|tojson }}</div>
 
   <script>
-  const addQuestionBtn = document.getElementById("addQuestionBtn");
-  const questionsContainer = document.getElementById("questionsContainer");
-  const form = document.getElementById("editInterviewForm");
+    document.addEventListener("DOMContentLoaded", function () {
+      // Elements
+      const form = document.getElementById("editInterviewForm");
+      const titleInput = document.getElementById("title");
+      const descriptionInput = document.getElementById("description");
+      const titleCount = document.getElementById("titleCount");
+      const descriptionCount = document.getElementById("descriptionCount");
+      const statusToggle = document.getElementById("statusToggle");
+      const statusLabel = document.getElementById("statusLabel");
 
-  // ➕ Add question field dynamically
-  addQuestionBtn.addEventListener("click", () => {
-    const div = document.createElement("div");
-    div.classList.add("question-item", "input-group", "mb-2");
-    div.innerHTML = `
-      <input type="text" class="form-control question-input" placeholder="Enter question" />
-      <button type="button" class="btn btn-danger remove-btn">X</button>
-    `;
-    questionsContainer.appendChild(div);
-  });
+      // Skill management
+      const skillsInput = document.getElementById("skillsInput");
+      const addSkillBtn = document.getElementById("addSkill");
+      const skillsContainer = document.getElementById("skillsContainer");
+      const skillsHidden = document.getElementById("skills");
 
-  // ❌ Remove a question
-  questionsContainer.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-btn")) {
-      e.target.parentElement.remove();
-    }
-  });
+      // Initialize skills from database
+      let skills = JSON.parse(document.getElementById('initial_skills').textContent || '[]');
 
-  // 🧾 Handle form submission (merge old + new)
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+      // Initialize character counters
+      function updateCharacterCounters() {
+        titleCount.textContent = titleInput.value.length;
+        descriptionCount.textContent = descriptionInput.value.length;
 
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
-    const category = document.getElementById("category").value;
-    const status = document.getElementById("status").value === "true";
+        // Update styles based on length
+        updateCharacterCountStyle(titleCount, titleInput.value.length, 255);
+        updateCharacterCountStyle(descriptionCount, descriptionInput.value.length, 2000);
+      }
 
-    // Collect all visible question inputs (old + new)
-    const questions = Array.from(document.querySelectorAll(".question-input"))
-      .map(q => q.value.trim())
-      .filter(q => q !== "");
+      function updateCharacterCountStyle(element, count, max) {
+        element.classList.remove('warning', 'danger');
+        if (count > max * 0.9) {
+          element.classList.add('danger');
+        } else if (count > max * 0.75) {
+          element.classList.add('warning');
+        }
+      }
 
-    // Send all questions back (not just new)
-    const data = { title, description, category, status, questions };
+      // Initialize on load
+      updateCharacterCounters();
+      updateSkillsDisplay();
 
-    const interviewId = "{{ interview.id }}"; // Injected by Jinja
+      // Event listeners for character counting
+      titleInput.addEventListener("input", updateCharacterCounters);
+      descriptionInput.addEventListener("input", updateCharacterCounters);
 
-    const response = await fetch(`/edit-public-interview/${interviewId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      // Status toggle
+      statusToggle.addEventListener("change", function () {
+        const isActive = statusToggle.checked;
+        statusLabel.textContent = isActive ? 'Active' : 'Inactive';
+        statusLabel.className = `status-badge ${isActive ? 'status-active' : 'status-inactive'}`;
+      });
+
+      // Skill management functions
+      function addSkill(skillText) {
+        const skill = skillText.trim();
+        if (skill && !skills.includes(skill)) {
+          skills.push(skill);
+          updateSkillsDisplay();
+          skillsInput.value = '';
+          skillsInput.focus();
+        }
+      }
+
+      function removeSkill(skill) {
+        skills = skills.filter(s => s !== skill);
+        updateSkillsDisplay();
+      }
+
+      function updateSkillsDisplay() {
+        skillsContainer.innerHTML = '';
+        skills.forEach(skill => {
+          const tag = document.createElement('div');
+          tag.className = 'skill-tag';
+          tag.innerHTML = `
+            ${skill}
+            <button type="button" class="remove-skill" onclick="removeSkill('${skill.replace(/'/g, "\\'")}')">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+          skillsContainer.appendChild(tag);
+        });
+        skillsHidden.value = JSON.stringify(skills);
+      }
+
+      // Add skill events
+      addSkillBtn.addEventListener('click', () => addSkill(skillsInput.value));
+      skillsInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addSkill(skillsInput.value);
+        }
+      });
+
+      // Form submission
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = {
+          title: titleInput.value.trim(),
+          role: document.getElementById("role").value.trim(),
+          skills: skills,
+          category: document.getElementById("category").value,
+          description: descriptionInput.value.trim(),
+          status: statusToggle.checked
+        };
+
+        // Validation
+        if (!formData.title) {
+          alert('Please enter an interview title');
+          titleInput.focus();
+          return;
+        }
+
+        const interviewId = document.getElementById("interview_id").textContent;
+
+        try {
+          const response = await fetch(`/edit-public-interview/${interviewId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert("✅ " + (result.message || "Interview updated successfully!"));
+            // Redirect manually after successful update
+            window.location.href = "/recruiter-public-interview";
+          } else {
+            alert("❌ Error: " + (result.detail || "Failed to update interview"));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Network error while updating interview.");
+        }
+      });
+
+      // Make removeSkill available globally
+      window.removeSkill = removeSkill;
     });
-
-    if (response.redirected) {
-      window.location.href = response.url;
-    } else {
-      alert("Failed to update interview");
-    }
-  });
-</script>
-
+  </script>
 </body>
+
 </html>

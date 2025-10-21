@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let silenceTimer = null;
   let finalTranscript = "";
   let hasProcessedAnswer = false;
+  let currentQuestionIndex = 0;
+  let totalQuestions = "AI-driven";
 
   // Recording
   let mediaStream = null;
@@ -138,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appendMessage("ai", "No recording data available.");
     }
   }
-  ////////////////////////////////////////
+
   async function uploadRecording(blob) {
     const formData = new FormData();
     formData.append("video", blob, `interview-${interviewId}-attempt-${attemptId}.webm`);
@@ -294,35 +296,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ws.onmessage = async (event) => {
     const data = JSON.parse(event.data);
+    
     if (data.type === "welcome") {
-      appendMessage("ai", `Total questions: ${data.total_questions}`);
+      appendMessage("ai", data.message || "Welcome to your AI-powered interview!");
+      if (data.instructions) {
+        appendMessage("ai", data.instructions);
+      }
       interviewStarted = true;
       setTimeout(startRecording, 1000);
+      
     } else if (data.type === "question") {
       currentQuestion = data.question;
-      appendMessage("ai", `${data.index}/${data.total_questions}: ${currentQuestion}`);
+      currentQuestionIndex = data.index || currentQuestionIndex + 1;
+      totalQuestions = data.total_questions || totalQuestions;
+      
+      // Format question display
+      const questionPrefix = typeof data.index === 'number' ? 
+        `Question ${data.index}:` : 
+        `Question ${currentQuestionIndex}:`;
+      
+      appendMessage("ai", `${questionPrefix} ${currentQuestion}`);
       micBtn.disabled = true;
-      await speakQuestion(`Question ${data.index}. ${currentQuestion}`);
+      
+      // Speak the question
+      await speakQuestion(currentQuestion);
+      
     } else if (data.type === "ack") {
       appendMessage("ai", data.message);
+      // Enable mic for next response
       micBtn.disabled = false;
       micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Start Speaking';
       micBtn.classList.replace("btn-secondary", "btn-primary");
+      
+    } else if (data.type === "timeout") {
+      appendMessage("ai", data.message);
+      // Re-enable mic for next question
+      micBtn.disabled = false;
+      micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Start Speaking';
+      micBtn.classList.replace("btn-secondary", "btn-primary");
+      
+    } else if (data.type === "evaluation") {
+      appendMessage("ai", "📊 Interview Evaluation Complete!");
+      appendMessage("ai", `Score: ${data.score}/100`);
+      appendMessage("ai", `Feedback: ${data.feedback}`);
+      
     } else if (data.type === "complete") {
       interviewComplete = true;
       appendMessage("ai", data.message);
-      if (data.summary) appendMessage("ai", data.summary);
+      
+      if (data.total_questions) {
+        appendMessage("ai", `Total questions asked: ${data.total_questions}`);
+      }
+      
+      // Disable mic and update UI
       micBtn.disabled = true;
       micBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Interview Completed';
       micBtn.classList.remove("btn-primary", "btn-warning", "btn-secondary");
       micBtn.classList.add("btn-success");
+      
       stopListening();
       stopRecording();
-      // setTimeout(() => {
-      //   ws.close();
-      //   window.location.href = "/all-public-interviews";
-      // }, 4000);
-      // setTimeout(() => ws.close(), 3000);
+      
+    } else if (data.type === "error") {
+      appendMessage("ai", `Error: ${data.message}`);
+      micBtn.disabled = true;
+      micBtn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Error';
+      micBtn.classList.remove("btn-primary", "btn-warning", "btn-secondary");
+      micBtn.classList.add("btn-danger");
     }
   };
 
@@ -332,6 +372,21 @@ document.addEventListener("DOMContentLoaded", () => {
     stopListening();
     if (isRecording && !interviewComplete) stopRecording();
   };
+
+  // --- EVENT LISTENERS ---
+  micBtn.addEventListener("click", () => {
+    if (!isListening && !interviewComplete) {
+      startListening();
+    }
+  });
+
+  // Add keyboard shortcut for mic (Space bar)
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !isListening && !interviewComplete && !e.target.matches("input, textarea")) {
+      e.preventDefault();
+      startListening();
+    }
+  });
 
   // --- CLEANUP ---
   window.addEventListener("beforeunload", () => {

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}My Public Interviews{% endblock %}
+
+{% block content %}
+<div class="col-md-9 col-lg-10">
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h2 mb-2">{{ interview.title }}</h1>
+                <p class="text-muted mb-0">{{ interview.description }}</p>
+            </div>
+            <a href="/recruiter-public-interview" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Interviews
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-primary mb-1">{{ attempts|length }}</h3>
+                        <p class="text-muted mb-0">Total Attempts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-success mb-1">{{ attempts|selectattr("score")|list|length }}</h3>
+                        <p class="text-muted mb-0">Evaluated</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-warning mb-1">{{ attempts|rejectattr("score")|list|length }}</h3>
+                        <p class="text-muted mb-0">Pending Evaluation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-info mb-1">
+                            {{ "%0.1f"|format((attempts|selectattr("score")|map(attribute="score")|list|sum /
+                            (attempts|selectattr("score")|list|length)) if attempts|selectattr("score")|list|length > 0
+                            else 0) }}%
+                        </h3>
+                        <p class="text-muted mb-0">Average Score</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attempts Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Interview Attempts</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if attempts %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">Candidate</th>
+                                <th class="border-0">Attempt Date</th>
+                                <th class="border-0">Score</th>
+                                <th class="border-0">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 40px; height: 40px;">
+                                                <span class="text-white fw-medium">{{ attempt.user.name[0].upper()
+                                                    }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="fw-medium text-dark">{{ attempt.user.name }}</div>
+                                            <div class="text-muted small">{{ attempt.user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="align-middle">
+                                    <span class="text-muted">{{ attempt.attempted_at.strftime('%Y-%m-%d %H:%M')
+                                        }}</span>
+                                </td>
+                                <td class="align-middle">
+                                    {% if attempt.score is not none %}
+                                    <span class="badge bg-success">{{ "%.1f"|format(attempt.score) }}%</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('public_interview_attempt_detail', attempt_id=attempt.id) }}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                        <a href="{{ attempt.resume }}" target="_blank"
+                                            class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-file-pdf me-1"></i>Resume
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No attempts yet</h5>
+                    <p class="text-muted">Candidates haven't attempted this interview yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .bg-primary {
+        background-color: #4e73df !important;
+    }
+
+    .bg-success {
+        background-color: #1cc88a !important;
+    }
+
+    .bg-info {
+        background-color: #36b9cc !important;
+    }
+
+    .btn-group .btn {
+        border-radius: 0.35rem;
+        margin-right: 0.25rem;
+    }
+</style>
+{% endblock %}

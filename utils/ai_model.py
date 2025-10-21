@@ -169,31 +169,10 @@ async def analyze_resume(
     
 
 
-async def evaluate_interview_ai(transcript: list) -> dict:
+async def evaluate_interview_ai(transcript: list, system_prompt) -> dict:
     transcript_text = "\n".join(
         [f"Q: {t['question']}\nA: {t['answer']}" for t in transcript if 'question' in t and 'answer' in t]
     )
-    system_prompt = """
-        You are an expert technical interviewer AI. You will receive a transcript of a candidate's interview session.
-        Your task is to analyze how well the candidate performed, considering the following:
-        - Technical correctness
-        - Clarity of explanation
-        - Confidence and communication skills
-        - Problem-solving ability
-        - Relevance and depth of responses
-
-        You must provide your response strictly in JSON format as:
-        {
-        "score": <float from 0-100>,
-        "status": "<pass or fail>",
-        "feedback": "<detailed paragraph>"
-        }
-
-        Rules:
-        - Score under 50 → status must be "fail".
-        - Score 50 and above → status must be "pass".
-        - Give clear, constructive feedback describing strong areas and what to improve.
-        """
     full_prompt = f"{system_prompt}\n\nTranscript:\n{transcript_text}"
     model = genai.GenerativeModel("gemini-2.0-flash")
     response = model.generate_content(full_prompt)
@@ -201,7 +180,6 @@ async def evaluate_interview_ai(transcript: list) -> dict:
         result = json.loads(response.text)
         return result
     except Exception:
-        # Fallback if AI response isn't valid JSON
         return {
             "score": 50.0,
             "status": "fail",

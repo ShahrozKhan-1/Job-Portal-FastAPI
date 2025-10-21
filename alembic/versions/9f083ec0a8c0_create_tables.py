@@ -1,8 +1,8 @@
-"""first commit
+"""create tables
 
-Revision ID: 05bbc5964aab
+Revision ID: 9f083ec0a8c0
 Revises: 
-Create Date: 2025-10-08 19:23:58.267794
+Create Date: 2025-10-20 18:19:51.851790
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '05bbc5964aab'
+revision: str = '9f083ec0a8c0'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -58,6 +58,8 @@ def upgrade() -> None:
     sa.Column('status', sa.Boolean(), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('role', sa.String(length=256), nullable=True),
+    sa.Column('skills', sa.JSON(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('questions', sa.JSON(), nullable=True),
     sa.Column('category', sa.String(length=100), nullable=True),
@@ -70,10 +72,12 @@ def upgrade() -> None:
     op.create_table('applicants',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('number', sa.String(length=256), nullable=False),
+    sa.Column('email', sa.String(length=256), nullable=True),
     sa.Column('address', sa.String(length=256), nullable=False),
     sa.Column('applicant', sa.Integer(), nullable=True),
     sa.Column('applied_for', sa.Integer(), nullable=True),
     sa.Column('applied_time', sa.DateTime(), nullable=True),
+    sa.Column('interview_time', sa.DateTime(), nullable=True),
     sa.Column('resume', sa.String(length=256), nullable=False),
     sa.Column('status', sa.String(length=256), nullable=False),
     sa.ForeignKeyConstraint(['applicant'], ['users.id'], ),
@@ -84,10 +88,12 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('interview_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('resume', sa.String(length=256), nullable=False),
     sa.Column('answers', sa.JSON(), nullable=True),
     sa.Column('score', sa.Float(), nullable=True),
     sa.Column('feedback', sa.Text(), nullable=True),
     sa.Column('attempted_at', sa.DateTime(), nullable=True),
+    sa.Column('video', sa.String(length=256), nullable=True),
     sa.ForeignKeyConstraint(['interview_id'], ['public_interviews.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -108,6 +114,10 @@ def upgrade() -> None:
     sa.Column('question_count', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('completed_at', sa.DateTime(), nullable=True),
+    sa.Column('video', sa.String(length=256), nullable=True),
+    sa.Column('score', sa.Float(), nullable=True),
+    sa.Column('status', sa.String(length=50), nullable=True),
+    sa.Column('feedback', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['applicant_id'], ['applicants.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

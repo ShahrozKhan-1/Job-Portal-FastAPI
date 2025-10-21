@@ -120,9 +120,10 @@ class PublicInterviewAttemptResponse(PublicInterviewAttemptBase):
 
 class PublicInterviewBase(BaseModel):
     title: str
+    role: str
+    skills: List[str] = []
     description: str = None
     category: str = None
-    questions: List[str] = []
     status: bool = Field(default=True)
 
 class PublicInterviewCreate(PublicInterviewBase):
@@ -130,9 +131,10 @@ class PublicInterviewCreate(PublicInterviewBase):
 
 class PublicInterviewUpdate(BaseModel):
     title: str = None
+    role: str = None
+    skills: List[str] = []
     description: str = None
     category: str = None
-    questions: List[str] = None
     status: bool = Field(default=True)
 
 class PublicInterviewResponse(PublicInterviewBase):

@@ -138,7 +138,7 @@ def scrape_linkedin_jobs(max_jobs=20, pages=1):
     )
     options.add_argument(f'--user-agent={custom_user_agent}')
     
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -160,7 +160,7 @@ def scrape_linkedin_jobs(max_jobs=20, pages=1):
     time.sleep(2)
     loc_search = driver.find_element(By.CSS_SELECTOR, "input#f_PP")
     loc_search.clear()
-    loc_search.send_keys("multan")
+    loc_search.send_keys(job_location)
     time.sleep(2)
     loc_search.send_keys(Keys.DOWN)
     time.sleep(2)

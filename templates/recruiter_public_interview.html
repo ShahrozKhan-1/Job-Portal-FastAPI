@@ -165,8 +165,8 @@
           </div>
 
           <div class="d-grid gap-2 mt-auto">
-            <a href="{{ url_for('edit_public_interview', interview_id=interview.id) }}" class="btn btn-outline-primary btn-sm">
-              <i class="fas fa-edit me-1"></i>Manage
+            <a href="{{ url_for('public_interview_results', interview_id=interview.id) }}" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-edit me-1"></i>View Results
             </a>
             <button class="btn btn-outline-secondary btn-sm copy-link-btn"
                     data-link="{{ request.host_url }}public/{{ interview.id }}">
@@ -204,7 +204,7 @@
       </div>
       <h3 class="fw-semibold mb-2">No Public Interviews Yet</h3>
       <p class="text-muted mb-4">Create your first public interview to start collecting responses from candidates.</p>
-      <a href="{{ url_for('create_public_interview_page') }}" class="btn btn-primary-custom btn-lg">
+      <a href="{{ url_for('create_public_interview') }}" class="btn btn-primary-custom btn-lg">
         <i class="fas fa-plus-circle me-2"></i>Create Interview
       </a>
     </div>

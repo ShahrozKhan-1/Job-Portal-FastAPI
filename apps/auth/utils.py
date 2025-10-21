@@ -58,5 +58,5 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     
     user = db.query(User).filter_by(email=email).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, headers={"Location": "/landing-page"})
     return user

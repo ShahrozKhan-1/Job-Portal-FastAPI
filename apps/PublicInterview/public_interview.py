@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File
 from fastapi.responses import JSONResponse, RedirectResponse
 from apps.auth.utils import get_current_user
-from database.models import PublicInterview, Job, PublicInterviewAttempt
+from database.models import PublicInterview, Job, PublicInterviewAttempt, User
 from sqlalchemy.orm import Session
-from database.database import get_db
+from database.database import get_db, engine
 import os
 from datetime import datetime
 from database.schema import PublicInterviewCreate, PublicInterviewUpdate
@@ -27,7 +27,7 @@ async def create_public_interview(
         return templates.TemplateResponse("create_public_interview.html", {"request":request, "current_user":current_user})
     elif request.method=="POST":
         if current_user.is_recruiter:
-            new_interview = PublicInterview(created_by=current_user.id, title=interview.title, description=interview.description, questions=interview.questions, category=interview.category, status=interview.status)
+            new_interview = PublicInterview(created_by=current_user.id, title=interview.title, role=interview.role, skills=interview.skills, description=interview.description, category=interview.category, status=interview.status)
             db.add(new_interview)
             db.commit()
             db.refresh(new_interview)
@@ -61,13 +61,15 @@ async def edit_public_interview(
     elif request.method=="PUT":
         db_interview = db.query(PublicInterview).filter_by(id=interview_id).first()
         db_interview.title = interview.title
+        db_interview.skills = interview.skills
+        db_interview.role = interview.role
         db_interview.status = interview.status
-        db_interview.questions = interview.questions
         db_interview.description = interview.description
         db_interview.category = interview.category
         db.commit()
         db.refresh(db_interview)
-        return RedirectResponse(url="/recruiter-public-interview", headers={"success":"Public Interview Added Successfully"}, status_code=302)
+        return JSONResponse(status_code=200,content={"message": "Public Interview Updated Successfully", "id": db_interview.id})
+
 
 
 @public_interview_router.get("/delete-public-interview/{interview_id}")
@@ -201,7 +203,6 @@ async def upload_interview_video(
     db:Session=Depends(get_db)
 ):
     try:
-        # Upload to Cloudinary
         upload_result = cloudinary.uploader.upload(
             video.file,
             resource_type="video",
@@ -224,3 +225,70 @@ async def upload_interview_video(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Video upload failed: {str(e)}")
+    
+
+
+@public_interview_router.get("/public-interview-results/{interview_id}")
+async def public_interview_results(
+    request: Request,
+    interview_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    if not current_user.is_recruiter:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    interview = db.query(PublicInterview).filter_by(id=interview_id, created_by=current_user.id).first()
+    if not interview:
+        raise HTTPException(status_code=404, detail="Interview not found")
+    attempts = (
+        db.query(PublicInterviewAttempt)
+        .join(User, PublicInterviewAttempt.user_id == User.id)
+        .filter(PublicInterviewAttempt.interview_id == interview_id)
+        .order_by(PublicInterviewAttempt.attempted_at.desc())
+        .all()
+    )
+    
+    return templates.TemplateResponse(
+        "public_interview_results.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "interview": interview,
+            "attempts": attempts
+        }
+    )
+
+@public_interview_router.get("/public-interview-attempt-detail/{attempt_id}")
+async def public_interview_attempt_detail(
+    request: Request,
+    attempt_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    if not current_user.is_recruiter:
+        raise HTTPException(status_code=403, detail="Access denied")
+    attempt = (
+        db.query(PublicInterviewAttempt)
+        .join(PublicInterview, PublicInterviewAttempt.interview_id == PublicInterview.id)
+        .join(User, PublicInterviewAttempt.user_id == User.id)
+        .filter(
+            PublicInterviewAttempt.id == attempt_id,
+            PublicInterview.created_by == current_user.id
+        )
+        .first()
+    )
+    
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+    
+    return templates.TemplateResponse(
+        "public_interview_attempt_detail.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "attempt": attempt,
+            "interview": attempt.interview,
+            "user": attempt.user
+        }
+    )

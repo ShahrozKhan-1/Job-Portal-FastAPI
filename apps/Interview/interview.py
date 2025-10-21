@@ -45,7 +45,28 @@ async def save_interview(applicant_id: int, data: dict, db: Session = Depends(ge
     transcript = data.get("transcript", [])
     if not transcript:
         return JSONResponse(status_code=400, content={"detail": "Transcript is empty"})
-    ai_result = await evaluate_interview_ai(transcript)
+    system_prompt = """
+        You are an expert technical interviewer AI. You will receive a transcript of a candidate's interview session.
+        Your task is to analyze how well the candidate performed, considering the following:
+        - Technical correctness
+        - Clarity of explanation
+        - Confidence and communication skills
+        - Problem-solving ability
+        - Relevance and depth of responses
+
+        You must provide your response strictly in JSON format as:
+        {
+        "score": <float from 0-100>,
+        "status": "<pass or fail>",
+        "feedback": "<detailed paragraph>"
+        }
+
+        Rules:
+        - Score under 50 → status must be "fail".
+        - Score 50 and above → status must be "pass".
+        - Give clear, constructive feedback describing strong areas and what to improve.
+        """
+    ai_result = await evaluate_interview_ai(transcript, system_prompt)
     score = ai_result.get("score", 0)
     status = ai_result.get("status", "fail")
     feedback = ai_result.get("feedback", "No feedback generated.")
