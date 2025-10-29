@@ -16,6 +16,7 @@ class AddUser(BaseModel):
 class LoginUser(BaseModel):
     email:str
     password:str = Field(min_length=8, max_length=12)
+    next:str
 
 class UpdateUser(BaseModel):
     name: str | None = None

@@ -1,401 +1,283 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const interviewId = document.getElementById("interview_id").textContent;
-  const attemptId = document.getElementById("attempt_id").textContent;
+class PublicInterviewChat {
+  constructor() {
+    this.ws = null;
+    this.mediaRecorder = null;
+    this.audioChunks = [];
+    this.isRecording = false;
+    this.stream = null;
+    this.cameraStream = null;
+    this.startTime = null;
+    this.timerInterval = null;
+    this.silenceTimer = null;
+    this.silenceThreshold = 0.3;
+    this.silenceDuration = 1500;
+    this.currentUserMsg = null; // 🆕 track current user message
 
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${protocol}//${window.location.host}/ws/public-interview/${interviewId}?attempt_id=${attemptId}`;
-  const ws = new WebSocket(wsUrl);
+    // Elements
+    this.interviewId = document.getElementById("interview_id")?.textContent?.trim();
+    this.attemptId = document.getElementById("attempt_id")?.textContent?.trim();
+    this.statusEl = document.getElementById("status");
+    this.statusDot = document.getElementById("statusDot");
+    this.chatBox = document.getElementById("chat-box");
+    this.voiceStatus = document.getElementById("voiceStatus");
+    this.waveformBars = document.getElementById("waveformBars");
+    this.recordingTimer = document.getElementById("recordingTimer");
+    this.recordingStatus = document.getElementById("recordingStatus");
+    this.cameraPreview = document.getElementById("cameraPreview");
+    this.cameraPlaceholder = document.getElementById("cameraPlaceholder");
 
-  // Elements
-  const chatBox = document.getElementById("chat-box");
-  const micBtn = document.getElementById("micBtn");
-  const listeningIndicator = document.getElementById("listeningIndicator");
-  const statusEl = document.getElementById("status");
-  const statusDot = document.getElementById("statusDot");
-  const cameraPreview = document.getElementById("cameraPreview");
-  const cameraPlaceholder = document.getElementById("cameraPlaceholder");
-  const recordingStatus = document.getElementById("recordingStatus");
-  const recordingTimer = document.getElementById("recordingTimer");
-
-  // State
-  let recognition;
-  let currentQuestion = null;
-  let isListening = false;
-  let interviewStarted = false;
-  let interviewComplete = false;
-  let speechSupported = false;
-  let silenceTimer = null;
-  let finalTranscript = "";
-  let hasProcessedAnswer = false;
-  let currentQuestionIndex = 0;
-  let totalQuestions = "AI-driven";
-
-  // Recording
-  let mediaStream = null;
-  let mediaRecorder = null;
-  let recordedChunks = [];
-  let mixedStream = null;
-  let isRecording = false;
-  let recordingStartTime = null;
-  let recordingTimerInterval = null;
-
-  // Audio mixing
-  let audioContext = null;
-  let microphoneSource = null;
-  let destination = null;
-
-  // Cached voice
-  let cachedVoice = null;
-
-  // --- INIT FUNCTIONS ---
-  async function preloadVoices() {
-    return new Promise((resolve) => {
-      function load() {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          cachedVoice =
-            voices.find(v => v.lang === "en-GB" && v.name.toLowerCase().includes("female")) ||
-            voices.find(v => v.lang === "en-GB") ||
-            voices[0];
-          resolve();
-        } else {
-          window.speechSynthesis.onvoiceschanged = load;
-        }
-      }
-      load();
-    });
+    this.init();
   }
 
-  async function initMedia() {
+  async init() {
+    await this.setupCamera();
+    await this.setupMicrophone();
+    this.connectWebSocket();
+  }
+
+  // 🎥 Camera setup
+  async setupCamera() {
     try {
-      if (!mediaStream) {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
-          audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
-        });
-      }
-
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        destination = audioContext.createMediaStreamDestination();
-        microphoneSource = audioContext.createMediaStreamSource(mediaStream);
-        microphoneSource.connect(destination);
-      }
-
-      mixedStream = new MediaStream([
-        ...mediaStream.getVideoTracks(),
-        ...destination.stream.getAudioTracks(),
-      ]);
-
-      cameraPreview.srcObject = mediaStream;
-      cameraPreview.style.display = "block";
-      cameraPlaceholder.style.display = "none";
-      console.log("🎥 Camera + mic ready");
+      this.cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.cameraPreview.srcObject = this.cameraStream;
+      this.cameraPlaceholder.style.display = "none";
     } catch (error) {
-      console.error("Camera error:", error);
-      appendMessage("ai", "Unable to access camera or mic. Check permissions.");
+      console.warn("Camera unavailable:", error);
+      this.cameraPlaceholder.style.display = "flex";
     }
   }
 
-  // --- RECORDING ---
-  function initRecorder() {
-    if (!mixedStream) return;
-    recordedChunks = [];
-    const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-      ? "video/webm;codecs=vp9,opus"
-      : "video/webm";
-
-    mediaRecorder = new MediaRecorder(mixedStream, { mimeType: mime, videoBitsPerSecond: 2500000 });
-
-    mediaRecorder.ondataavailable = (e) => e.data.size > 0 && recordedChunks.push(e.data);
-    mediaRecorder.onstop = handleRecordingStop;
-    console.log("🎬 Recorder ready");
-  }
-
-  function startRecording() {
-    if (mediaRecorder && mediaRecorder.state !== "recording") {
-      mediaRecorder.start(1000);
-      isRecording = true;
-      recordingStatus.classList.remove("hidden");
-      startRecordingTimer();
-      console.log("📹 Recording started");
-    }
-  }
-
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-      isRecording = false;
-      recordingStatus.classList.add("hidden");
-      stopRecordingTimer();
-      console.log("📹 Recording stopped");
-    }
-  }
-
-  function handleRecordingStop() {
-    const blob = new Blob(recordedChunks, { type: "video/webm" });
-    if (blob.size > 0) {
-      setTimeout(() => uploadRecording(blob), 1500); // slight delay for smooth UI
-    } else {
-      appendMessage("ai", "No recording data available.");
-    }
-  }
-
-  async function uploadRecording(blob) {
-    const formData = new FormData();
-    formData.append("video", blob, `interview-${interviewId}-attempt-${attemptId}.webm`);
-    formData.append("interview_id", interviewId);
-    formData.append("attempt_id", attemptId);
-
+  // 🎤 Microphone + waveform setup
+  async setupMicrophone() {
     try {
-      appendMessage("ai", "Uploading recording...");
-      const response = await fetch("/upload-public-interview-video", { method: "POST", body: formData });
-      if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
-      const result = await response.json();
-      appendMessage("ai", "✅ Interview video uploaded!");
-      console.log("Upload success:", result.video_url);
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.audioContext = new AudioContext();
+      this.source = this.audioContext.createMediaStreamSource(this.stream);
+      this.analyser = this.audioContext.createAnalyser();
+      this.source.connect(this.analyser);
+      this.dataArray = new Float32Array(this.analyser.fftSize);
+
+      const updateWaveform = () => {
+        this.analyser.getFloatTimeDomainData(this.dataArray);
+        const rms = Math.sqrt(this.dataArray.reduce((s, a) => s + a * a, 0) / this.dataArray.length);
+        const scale = Math.min(1.5, rms * 10);
+        this.waveformBars.querySelectorAll(".bar").forEach(bar => {
+          bar.style.height = `${10 + Math.random() * 80 * scale}px`;
+        });
+        requestAnimationFrame(updateWaveform);
+      };
+      updateWaveform();
     } catch (err) {
-      console.error("Upload error:", err);
-      appendMessage("ai", "Upload failed. Please contact support.");
+      console.error("Mic setup error:", err);
     }
   }
 
-  function startRecordingTimer() {
-    recordingStartTime = Date.now();
-    recordingTimerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-      recordingTimer.textContent = `${String(Math.floor(elapsed / 60)).padStart(2, "0")}:${String(elapsed % 60).padStart(2, "0")}`;
-    }, 1000);
+  // 🌐 WebSocket connection
+  connectWebSocket() {
+    const wsUrl = `${location.origin.replace("http", "ws")}/ws/public-interview/${this.interviewId}?attempt_id=${this.attemptId}`;
+    this.ws = new WebSocket(wsUrl);
+
+    this.ws.onopen = () => {
+      this.updateStatus("Connected", "green");
+      this.addMessage("system", "Interview session connected. Please wait for the first question...");
+    };
+
+    this.ws.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      console.log("📩 WS Message:", data);
+
+      switch (data.type) {
+        case "question":
+          await this.handleQuestion(data);
+          break;
+
+        case "user_transcript":
+          this.updateUserMessage(data.text);
+          break;
+
+        case "evaluation_start":
+          this.addMessage("system", "Evaluating your performance...");
+          break;
+
+        case "evaluation":
+          this.addMessage("ai", `Score: ${data.score}\nFeedback: ${data.feedback}`);
+          break;
+
+        case "complete":
+          this.addMessage("system", data.message);
+          this.stopTimer();
+          break;
+
+        case "error":
+          this.addMessage("error", data.message);
+          this.updateStatus("Error", "red");
+          break;
+      }
+    };
+
+    this.ws.onclose = () => {
+      this.updateStatus("Disconnected", "gray");
+      this.stopTimer();
+    };
   }
 
-  function stopRecordingTimer() {
-    clearInterval(recordingTimerInterval);
-    recordingTimer.textContent = "00:00";
-  }
+  // 🎧 Handle AI question
+  async handleQuestion(data) {
+    const { text, audio } = data;
+    this.addMessage("ai", text);
 
-  // --- SPEECH FUNCTIONS ---
-  function appendMessage(sender, text) {
-    const frag = document.createDocumentFragment();
-    const div = document.createElement("div");
-    div.className = sender === "ai" ? "ai-message" : "user-message";
-    div.textContent = text;
-    frag.appendChild(div);
-    chatBox.appendChild(frag);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+    if (audio) {
+      const audioBlob = await this.base64ToBlob(audio);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audioPlayer = new Audio(audioUrl);
+      audioPlayer.play();
 
-  function speakQuestion(text) {
-    if (!speechSupported) return Promise.resolve();
-    return new Promise((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.voice = cachedVoice;
-      utterance.lang = "en-GB";
-
-      utterance.onend = () => setTimeout(() => { startListening(); resolve(); }, 100);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    });
-  }
-
-  function startListening() {
-    if (!recognition) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) return alert("Speech recognition not supported.");
-      recognition = new SR();
-      recognition.lang = "en-US";
-      recognition.interimResults = true;
-      recognition.continuous = true;
+      audioPlayer.onended = () => this.startRecording();
+    } else {
+      this.startRecording();
     }
+  }
 
-    if (isListening) return;
-    recognition.abort();
-    finalTranscript = "";
-    hasProcessedAnswer = false;
+  // 🎙️ Start recording
+  startRecording() {
+    if (this.isRecording || !this.stream) return;
 
-    const hardTimeout = setTimeout(() => {
-      if (!hasProcessedAnswer) {
-        hasProcessedAnswer = true;
-        stopListening();
-        processAnswer("(no response detected)");
+    this.audioChunks = [];
+    this.mediaRecorder = new MediaRecorder(this.stream);
+    this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
+    this.mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
+      const base64Audio = await this.blobToBase64(audioBlob);
+
+      // 🧠 Show “Processing…” placeholder for user
+      this.currentUserMsg = this.addMessage("user", "Processing your response...");
+      this.ws.send(JSON.stringify({ audio: base64Audio }));
+      this.voiceStatus.querySelector(".status-label").textContent = "Processing...";
+    };
+
+    this.isRecording = true;
+    this.startTimer();
+    this.voiceStatus.querySelector(".status-label").textContent = "Listening...";
+    this.recordingStatus.classList.remove("hidden");
+    this.mediaRecorder.start();
+
+    this.monitorSilence();
+  }
+
+  // 🕵️ Silence detection logic
+  monitorSilence() {
+    let userHasSpoken = false;
+    let noSpeechTimer = setTimeout(() => {
+      if (!userHasSpoken) {
+        console.log("⏱️ No speech detected for 8s, stopping recording...");
+        this.stopRecording();
       }
     }, 8000);
 
-    recognition.onstart = () => {
-      isListening = true;
-      listeningIndicator.classList.remove("hidden");
-      micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Listening...';
-      micBtn.classList.replace("btn-primary", "btn-warning");
-    };
+    const checkSilence = () => {
+      this.analyser.getFloatTimeDomainData(this.dataArray);
+      const rms = Math.sqrt(this.dataArray.reduce((s, a) => s + a * a, 0) / this.dataArray.length);
 
-    recognition.onresult = (e) => {
-      clearTimeout(silenceTimer);
-      for (let i = e.resultIndex; i < e.results.length; ++i)
-        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
-      silenceTimer = setTimeout(() => {
-        if (!hasProcessedAnswer) {
-          hasProcessedAnswer = true;
-          stopListening();
-          processAnswer(finalTranscript.trim() || "(no response detected)");
+      if (rms > this.silenceThreshold) {
+        userHasSpoken = true;
+        clearTimeout(noSpeechTimer);
+        clearTimeout(this.silenceTimer);
+        this.silenceTimer = null;
+      } else if (userHasSpoken) {
+        if (!this.silenceTimer) {
+          this.silenceTimer = setTimeout(() => {
+            console.log("🔇 Silence detected after speech, stopping recording...");
+            this.stopRecording();
+          }, this.silenceDuration);
         }
-      }, 1500);
+      }
+
+      if (this.isRecording) requestAnimationFrame(checkSilence);
     };
 
-    recognition.onerror = () => {
-      if (!hasProcessedAnswer) {
-        hasProcessedAnswer = true;
-        stopListening();
-        processAnswer("(no response detected)");
-      }
-    };
-
-    recognition.onend = () => {
-      clearTimeout(hardTimeout);
-      clearTimeout(silenceTimer);
-      if (!hasProcessedAnswer) {
-        hasProcessedAnswer = true;
-        processAnswer(finalTranscript.trim() || "(no response detected)");
-      }
-      stopListening();
-    };
-
-    recognition.start();
+    checkSilence();
   }
 
-  function stopListening() {
-    clearTimeout(silenceTimer);
-    if (recognition && isListening) {
-      try { recognition.stop(); } catch { }
+  stopRecording() {
+    if (this.isRecording && this.mediaRecorder.state !== "inactive") {
+      this.mediaRecorder.stop();
+      this.isRecording = false;
+      this.stopTimer();
+      this.recordingStatus.classList.add("hidden");
+      clearTimeout(this.silenceTimer);
+      this.silenceTimer = null;
     }
-    isListening = false;
-    listeningIndicator.classList.add("hidden");
-    micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Processing...';
-    micBtn.classList.replace("btn-warning", "btn-secondary");
-    micBtn.disabled = true;
   }
 
-  function processAnswer(transcript) {
-    appendMessage("user", transcript);
-    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ answer: transcript }));
+  // 🧮 Timer logic
+  startTimer() {
+    this.startTime = Date.now();
+    this.timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
+      const secs = String(elapsed % 60).padStart(2, "0");
+      this.recordingTimer.textContent = `${mins}:${secs}`;
+    }, 1000);
   }
 
-  // --- WEBSOCKET HANDLERS ---
-  ws.onopen = async () => {
-    statusEl.textContent = "Connected - Interview Starting";
-    statusDot.classList.add("active");
-    speechSupported = "speechSynthesis" in window;
+  stopTimer() {
+    clearInterval(this.timerInterval);
+    this.recordingTimer.textContent = "00:00";
+  }
 
-    // Parallel init (camera + voices)
-    await Promise.all([initMedia(), preloadVoices()]);
-    initRecorder();
+  // 💬 Add message to chat
+  addMessage(sender, text) {
+    const msg = document.createElement("div");
+    msg.classList.add("message");
+    if (sender === "ai") msg.classList.add("ai-message");
+    else if (sender === "system") msg.classList.add("system-message");
+    else if (sender === "error") msg.classList.add("error-message");
+    else msg.classList.add("user-message");
 
-    micBtn.disabled = true;
-    micBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Starting...';
-  };
+    const label = document.createElement("span");
+    label.classList.add("message-label");
+    label.textContent = sender === "ai" ? "AI" : sender === "system" ? "System" : sender === "error" ? "Error" : "You";
 
-  ws.onmessage = async (event) => {
-    const data = JSON.parse(event.data);
-    
-    if (data.type === "welcome") {
-      appendMessage("ai", data.message || "Welcome to your AI-powered interview!");
-      if (data.instructions) {
-        appendMessage("ai", data.instructions);
-      }
-      interviewStarted = true;
-      setTimeout(startRecording, 1000);
-      
-    } else if (data.type === "question") {
-      currentQuestion = data.question;
-      currentQuestionIndex = data.index || currentQuestionIndex + 1;
-      totalQuestions = data.total_questions || totalQuestions;
-      
-      // Format question display
-      const questionPrefix = typeof data.index === 'number' ? 
-        `Question ${data.index}:` : 
-        `Question ${currentQuestionIndex}:`;
-      
-      appendMessage("ai", `${questionPrefix} ${currentQuestion}`);
-      micBtn.disabled = true;
-      
-      // Speak the question
-      await speakQuestion(currentQuestion);
-      
-    } else if (data.type === "ack") {
-      appendMessage("ai", data.message);
-      // Enable mic for next response
-      micBtn.disabled = false;
-      micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Start Speaking';
-      micBtn.classList.replace("btn-secondary", "btn-primary");
-      
-    } else if (data.type === "timeout") {
-      appendMessage("ai", data.message);
-      // Re-enable mic for next question
-      micBtn.disabled = false;
-      micBtn.innerHTML = '<i class="bi bi-mic-fill me-2"></i>Start Speaking';
-      micBtn.classList.replace("btn-secondary", "btn-primary");
-      
-    } else if (data.type === "evaluation") {
-      appendMessage("ai", "📊 Interview Evaluation Complete!");
-      appendMessage("ai", `Score: ${data.score}/100`);
-      appendMessage("ai", `Feedback: ${data.feedback}`);
-      
-    } else if (data.type === "complete") {
-      interviewComplete = true;
-      appendMessage("ai", data.message);
-      
-      if (data.total_questions) {
-        appendMessage("ai", `Total questions asked: ${data.total_questions}`);
-      }
-      
-      // Disable mic and update UI
-      micBtn.disabled = true;
-      micBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Interview Completed';
-      micBtn.classList.remove("btn-primary", "btn-warning", "btn-secondary");
-      micBtn.classList.add("btn-success");
-      
-      stopListening();
-      stopRecording();
-      
-    } else if (data.type === "error") {
-      appendMessage("ai", `Error: ${data.message}`);
-      micBtn.disabled = true;
-      micBtn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Error';
-      micBtn.classList.remove("btn-primary", "btn-warning", "btn-secondary");
-      micBtn.classList.add("btn-danger");
+    const textEl = document.createElement("p");
+    textEl.textContent = text;
+
+    msg.appendChild(label);
+    msg.appendChild(textEl);
+    this.chatBox.appendChild(msg);
+    this.chatBox.scrollTop = this.chatBox.scrollHeight;
+
+    return textEl; // 🆕 return the text element for updating later
+  }
+
+  // 🆕 Update user message with final STT text
+  updateUserMessage(finalText) {
+    if (this.currentUserMsg) {
+      this.currentUserMsg.textContent = finalText;
+      this.currentUserMsg = null;
+    } else {
+      this.addMessage("user", finalText);
     }
-  };
+  }
 
-  ws.onclose = () => {
-    statusEl.textContent = "Disconnected";
-    statusDot.classList.remove("active");
-    stopListening();
-    if (isRecording && !interviewComplete) stopRecording();
-  };
+  updateStatus(text, color) {
+    this.statusEl.textContent = text;
+    this.statusDot.style.background = color;
+  }
 
-  // --- EVENT LISTENERS ---
-  micBtn.addEventListener("click", () => {
-    if (!isListening && !interviewComplete) {
-      startListening();
-    }
-  });
+  // 🧩 Utils
+  async blobToBase64(blob) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(",")[1]);
+      reader.readAsDataURL(blob);
+    });
+  }
 
-  // Add keyboard shortcut for mic (Space bar)
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && !isListening && !interviewComplete && !e.target.matches("input, textarea")) {
-      e.preventDefault();
-      startListening();
-    }
-  });
+  async base64ToBlob(base64) {
+    const binary = atob(base64);
+    const array = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new Blob([array], { type: "audio/mp3" });
+  }
+}
 
-  // --- CLEANUP ---
-  window.addEventListener("beforeunload", () => {
-    if (ws.readyState === WebSocket.OPEN) ws.close();
-    if (recognition && isListening) recognition.stop();
-    window.speechSynthesis.cancel();
-    clearTimeout(silenceTimer);
-    if (isRecording) stopRecording();
-    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-    if (audioContext) audioContext.close();
-  });
-});
+document.addEventListener("DOMContentLoaded", () => new PublicInterviewChat());

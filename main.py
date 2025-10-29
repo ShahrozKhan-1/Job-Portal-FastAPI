@@ -10,14 +10,39 @@ from apps.PublicInterview.public_interview import public_interview_router
 from apps.Interview.interview import interview_router
 from starlette.middleware.sessions import SessionMiddleware
 from config import SECRET_KEY
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", 
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    # Add your production domains here later
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# @app.get("/{id}")
+# async def read_item(id: str):
+#     print(f"Received ID: {id}")
+#     return {"id": id}
+
 
 
 app.include_router(websocket_router)

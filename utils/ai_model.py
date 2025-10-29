@@ -218,6 +218,6 @@ async def stream_ai_response(user_message: str, system_prompt: str, memory: Conv
             await memory.summarize()
 
     except Exception as e:
-        print(f"❌ [stream_ai_response ERROR]: {str(e)}")
+        print(f"[stream_ai_response ERROR]: {str(e)}")
         yield f"[ERROR] {str(e)}"
 

@@ -22,14 +22,14 @@
         <section class="card">
             <h2>Overview</h2>
             <p>
-                {{result.overview}}
+                {{ result.overview }}
             </p>
             <div class="actions">
-                <form method="post" action="{{url_for('applicant_status', applicant_id=applicant.id)}}"
-                    class="card-body">
+                <form method="post" action="{{ url_for('applicant_status', applicant_id=applicant.id) }}"
+                    class="card-body" id="statusForm">
                     <div class="mb-3">
                         <label class="form-label">Current Status</label>
-                        <select class="form-select" name="status">
+                        <select class="form-select" name="status" id="statusSelect">
                             <option value="pending" {% if applicant.status=='pending' %}selected{% endif %}>Pending
                                 Review</option>
                             <option value="rejected" {% if applicant.status=='rejected' %}selected{% endif %}>Rejected
@@ -38,38 +38,35 @@
                             </option>
                         </select>
                     </div>
-                    <button class="btn btn-primary w-100">
+
+                    <!-- Hidden interview time input -->
+                    <input type="hidden" name="interview_time" id="interviewTimeHidden">
+
+                    <button class="btn btn-primary w-100" type="submit">
                         <i class="fas fa-save me-1"></i>Update Status
                     </button>
                 </form>
             </div>
         </section>
-        
+
         <div class="score-card" aria-label="Match score">
             <div class="score-head">
                 <div class="score-title">Match Score</div>
-                <div class="score-value" id="scoreValue"> {{result.match_score}} %</div>
+                <div class="score-value" id="scoreValue">{{ result.match_score }}%</div>
             </div>
             <div class="progress">
-                <div class="progress-bar" 
-                    role="progressbar" 
-                    style="--progress: {{ result.match_score }}%;" 
-                    aria-valuenow="{{ result.match_score }}" 
-                    aria-valuemin="0" 
-                    aria-valuemax="100">
+                <div class="progress-bar" role="progressbar" style="--progress: {{ result.match_score }}%;"
+                    aria-valuenow="{{ result.match_score }}" aria-valuemin="0" aria-valuemax="100">
                     {{ result.match_score }}%
                 </div>
             </div>
             <div class="divider"></div>
-            <div id="fitBadge" 
-                class="fit {% if result.fit_for_job == 'Yes' %}fit--yes{% else %}fit--no{% endif %}" 
+            <div id="fitBadge" class="fit {% if result.fit_for_job == 'Yes' %}fit--yes{% else %}fit--no{% endif %}"
                 aria-label="Fit for job">
                 {{ result.fit_for_job }}
             </div>
-            <p> {{result.reason_for_fit}} </p>
-
+            <p>{{ result.reason_for_fit }}</p>
         </div>
-
     </div>
 
     <div class="grid">
@@ -77,7 +74,7 @@
             <h2>Strengths</h2>
             <ul id="strengthsList" class="list" aria-label="Strengths list">
                 {% for strength in result.strengths %}
-                <li>{{strength}}</li>
+                <li>{{ strength }}</li>
                 {% endfor %}
             </ul>
         </section>
@@ -86,13 +83,91 @@
             <h2>Weaknesses</h2>
             <ul id="weaknessesList" class="list" aria-label="Weaknesses list">
                 {% for weakness in result.weaknesses %}
-                <li>{{weakness}}</li>
+                <li>{{ weakness }}</li>
                 {% endfor %}
             </ul>
         </section>
-
-
     </div>
 </main>
+
+<!-- Bootstrap Modal for Interview Scheduling -->
+<div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="interviewModalLabel">Schedule Interview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="interview-form">
+                    <div class="mb-3">
+                        <label for="interview-date" class="form-label">Interview Date</label>
+                        <input type="date" id="interview-date" name="interview_date" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="interview-time" class="form-label">Interview Time</label>
+                        <input type="time" id="interview-time" name="interview_time" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirm-modal" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- JS Logic -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const statusSelect = document.getElementById("statusSelect");
+        const statusForm = document.getElementById("statusForm");
+        const confirmModal = document.getElementById("confirm-modal");
+
+        // Bootstrap modal instance
+        const interviewModal = new bootstrap.Modal(document.getElementById("interviewModal"));
+
+        // When recruiter selects "Accepted"
+        statusSelect.addEventListener("change", () => {
+            if (statusSelect.value === "accepted") {
+                interviewModal.show();
+            }
+        });
+
+        // Confirm button adds hidden inputs and submits form
+        confirmModal.addEventListener("click", () => {
+            const dateInput = document.getElementById("interview-date").value;
+            const timeInput = document.getElementById("interview-time").value;
+
+            if (!dateInput || !timeInput) {
+                alert("Please select both date and time for the interview.");
+                return;
+            }
+
+            // Create hidden fields for backend
+            const dateField = document.createElement("input");
+            dateField.type = "hidden";
+            dateField.name = "interview_date";
+            dateField.value = dateInput;
+
+            const timeField = document.createElement("input");
+            timeField.type = "hidden";
+            timeField.name = "interview_time";
+            timeField.value = timeInput;
+
+            statusForm.appendChild(dateField);
+            statusForm.appendChild(timeField);
+
+            interviewModal.hide();
+            statusForm.submit();
+        });
+    });
+
+</script>
 
 {% endblock %}

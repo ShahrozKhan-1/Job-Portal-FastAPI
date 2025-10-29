@@ -102,7 +102,6 @@ async def public_interview_detail(
 
 
 
-
 @public_interview_router.get("/all-public-interviews")
 async def all_public_interview(
     request:Request,

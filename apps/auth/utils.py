@@ -44,19 +44,24 @@ def create_access_token(data:dict, expires_delta:timedelta):
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
+    next_url = request.url.path    # default to dashboard
+    
     if not token:
-        raise HTTPException(status_code=302, headers={"Location": "/landing-page"})
+        raise HTTPException(status_code=302, headers={"Location": f"/login?next={next_url}"})
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=302, headers={"Location": "/landing-page"})
+        raise HTTPException(status_code=302, headers={"Location": f"/login?next={next_url}"})
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid token", headers={"Location": "/landing-page"})
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
     email = payload.get("sub")
     if not email:
         raise HTTPException(status_code=401, detail="Invalid token payload")
     
     user = db.query(User).filter_by(email=email).first()
     if not user:
-        raise HTTPException(status_code=404, headers={"Location": "/landing-page"})
+        raise HTTPException(status_code=404, headers={"Location": f"/login?next={next_url}"})
+    
     return user

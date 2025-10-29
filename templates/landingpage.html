@@ -1,366 +1,929 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobConnect AI | AI-Powered Job Portal</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>JobHub - Find Your Dream Job</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4cc9f0;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4bb543;
+            --primary-color: #0066ff;
+            --secondary-color: #f5f5f5;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --light-blue: #e3f2fd;
         }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            color: var(--dark);
-            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
         }
-        
+
+        /* Navigation */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+        }
+
         .navbar-brand {
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-color) !important;
         }
-        
-        .hero-section {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+        .nav-link {
+            color: var(--text-light) !important;
+            margin: 0 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .btn-sign-in {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            margin-right: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-post-job {
+            background-color: var(--primary-color);
             color: white;
-            padding: 100px 0;
+            text-decoration: none;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+            padding: 5rem 0;
             position: relative;
             overflow: hidden;
         }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            top: -50%;
-            left: -50%;
-            transform: rotate(45deg);
-            z-index: 1;
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            line-height: 1.2;
         }
-        
-        .hero-content {
-            position: relative;
-            z-index: 2;
+
+        .hero-content p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            line-height: 1.8;
         }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            padding: 10px 25px;
-            font-weight: 500;
+
+        .hero-highlights {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary);
-            border-color: var(--secondary);
-        }
-        
-        .btn-outline-light:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .feature-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-            height: 100%;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 50%;
+
+        .highlight-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 28px;
+            gap: 0.75rem;
         }
-        
-        .section-title {
-            position: relative;
-            margin-bottom: 50px;
-            font-weight: 700;
-        }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 70px;
-            height: 4px;
-            background: var(--primary);
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-        
-        .process-step {
-            position: relative;
-            text-align: center;
-            padding: 0 20px;
-        }
-        
-        .process-step::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-            top: 40px;
-            left: 50%;
-            z-index: -1;
-        }
-        
-        .process-step:last-child::before {
-            display: none;
-        }
-        
-        .step-number {
-            width: 80px;
-            height: 80px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .testimonial-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            margin: 15px;
-        }
-        
-        .testimonial-img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-        }
-        
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 80px 0;
-        }
-        
-        footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 60px 0 20px;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-links a:hover {
-            color: white;
-        }
-        
-        .social-icons a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+
+        .highlight-icon {
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            background: var(--light-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .highlight-text {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary-large {
+            background-color: var(--primary-color);
             color: white;
-            margin-right: 10px;
-            transition: all 0.3s ease;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
-        
-        .social-icons a:hover {
-            background: var(--primary);
+
+        .btn-primary-large:hover {
+            background-color: #0052cc;
+            color: white;
+        }
+
+        .btn-secondary-large {
+            background-color: white;
+            color: var(--primary-color);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .skills-tag {
+            display: inline-block;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .btn-secondary-large:hover {
+            background-color: var(--light-blue);
+            color: var(--primary-color);
+        }
+
+        .hero-image {
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 3rem 0;
+            background: white;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            background: var(--light-blue);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 102, 255, 0.15);
         }
-        
-        .copyright {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 20px;
-            margin-top: 40px;
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
-        
-        /* Responsive adjustments */
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .feature-card {
+            background: var(--light-blue);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 102, 255, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .feature-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Public Interviews Section */
+        .public-interviews {
+            padding: 4rem 0;
+            background: var(--secondary-color);
+        }
+
+        .interview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .interview-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 102, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .interview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .interview-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .difficulty-easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .interview-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .interview-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .interview-topic {
+            display: inline-block;
+            background: var(--light-blue);
+            color: var(--primary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .interview-action {
+            margin-top: 1rem;
+        }
+
+        .btn-attempt {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-attempt:hover {
+            background-color: #0052cc;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* ---------- NEW: Fixed-size interview cards ---------- */
+        .public-interviews .interview-card {
+            position: relative;
+            /* for badge positioning */
+            height: 300px;
+            /* fixed card height */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* hide overflow inside card */
+            padding: 1rem;
+        }
+
+        .public-interviews .interview-card .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            flex: 1 1 auto;
+            /* allow body to fill card */
+            overflow: hidden;
+        }
+
+        /* make description truncate and not push layout */
+        .public-interviews .interview-card .card-text {
+            max-height: 3.6rem;
+            /* roughly 2 lines */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            -webkit-box-orient: vertical;
+        }
+
+        /* skills area scrolls if too many tags */
+        .public-interviews .interview-card .skills-container {
+            overflow: hidden;
+        }
+
+        .public-interviews .interview-card .skills-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-height: 48px;
+            overflow: hidden;
+        }
+
+        /* pin badge top-right */
+        .public-interviews .interview-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translateY(0);
+            background: var(--primary-color);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 0 0 0 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* keep action area at bottom */
+        .public-interviews .interview-card .card-footer,
+        .public-interviews .interview-card .interview-action {
+            margin-top: auto;
+        }
+
+        /* responsive tweak: slightly smaller height on small screens */
         @media (max-width: 768px) {
-            .process-step::before {
-                display: none;
+            .public-interviews .interview-card {
+                height: 320px;
             }
-            
-            .hero-section {
-                padding: 60px 0;
-            }
-            
+        }
+
+        /* Why Choose Us Section */
+        .why-choose-us {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .advantage-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .advantage-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--light-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .advantage-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .advantage-content p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Join Us Section */
+        .join-us {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0052cc 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .join-us h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .join-us p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .join-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-join-primary {
+            background-color: white;
+            color: var(--primary-color);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-join-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            color: var(--primary-color);
+        }
+
+        .btn-join-secondary {
+            background-color: transparent;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            border: 2px solid white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-join-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-section h5 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
             .hero-content h1 {
                 font-size: 2rem;
+            }
+
+            .hero-highlights {
+                flex-direction: column;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .view-all {
+                margin-top: 1rem;
+            }
+
+            .join-buttons {
+                flex-direction: column;
+            }
+
+            .join-us h2 {
+                font-size: 1.8rem;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-handshake me-2"></i>JobConnect AI
+                <i class="fas fa-briefcase"></i> JobHub
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#features">Features</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#how-it-works">How It Works</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#testimonials">Testimonials</a>
-                    </li>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#interviews">Interviews</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
                 </ul>
-                <div class="d-flex">
-                    <a href="{{url_for('get_login')}}" class="btn btn-outline-primary me-2">Login</a>
-                    <a href="{{url_for('get_register')}}" class="btn btn-primary">Sign Up</a>
-                </div>
+                <!-- Added Jinja templating for navigation buttons -->
+                <a href="{{ url_for('get_login') }}" class="btn btn-sign-in">Sign In</a>
+                <a href="{{ url_for('get_register') }}" class="btn btn-post-job">Sign Up</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero" id="home">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6 hero-content">
-                    <h1 class="display-4 fw-bold mb-4">Revolutionizing Recruitment with AI</h1>
-                    <p class="lead mb-4">Connect with top talent through our AI-powered platform. Automate job scraping, resume screening, and conduct interviews with voice and video capabilities.</p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="{{url_for('get_login')}}" class="btn btn-light btn-lg">Get Started</a>
-                        <a href="{{url_for('get_login')}}" class="btn btn-outline-light btn-lg">Watch Demo</a>
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1>Your AI-Powered Career Gateway</h1>
+                        <p>Experience the future of job hunting with intelligent resume matching, AI-powered voice
+                            interviews, and smart recruiter shortlisting. Find your perfect job match today.</p>
+
+                        <div class="hero-highlights">
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-microphone"></i></div>
+                                <div class="highlight-text">AI Voice Interviews</div>
+                            </div>
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-file-alt"></i></div>
+                                <div class="highlight-text">Resume Matching</div>
+                            </div>
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-check-circle"></i></div>
+                                <div class="highlight-text">Smart Shortlisting</div>
+                            </div>
+                        </div>
+
+                        <div class="hero-buttons">
+                            <!-- Added Jinja templating for hero buttons -->
+                            <a href="{{ url_for('get_register') }}" class="btn-primary-large">Get Started Now</a>
+                            <a href="#features" class="btn-secondary-large">Learn More</a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-6 text-center">
-                    <img src="{{ url_for('static', path='images/image.png') }}" alt="JobConnect AI Dashboard" class="img-fluid w-75 rounded shadow">
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <svg viewBox="0 0 400 400" style="max-width: 100%; height: auto;">
+                            <!-- Background -->
+                            <rect width="400" height="400" fill="#e3f2fd" rx="20" />
+
+                            <!-- Person with laptop -->
+                            <circle cx="200" cy="120" r="35" fill="#0066ff" />
+                            <rect x="160" y="160" width="80" height="60" fill="#0066ff" rx="5" />
+                            <rect x="155" y="155" width="90" height="70" fill="none" stroke="#0066ff" stroke-width="2"
+                                rx="5" />
+
+                            <!-- Floating elements -->
+                            <circle cx="100" cy="100" r="20" fill="#0066ff" opacity="0.2" />
+                            <circle cx="300" cy="150" r="25" fill="#0066ff" opacity="0.15" />
+                            <rect x="80" y="280" width="40" height="40" fill="#0066ff" opacity="0.2" rx="5" />
+                            <rect x="280" y="300" width="50" height="50" fill="#0066ff" opacity="0.15" rx="5" />
+
+                            <!-- Icons -->
+                            <text x="100" y="105" text-anchor="middle" font-size="20" fill="#0066ff">🎤</text>
+                            <text x="300" y="160" text-anchor="middle" font-size="24" fill="#0066ff">📄</text>
+                            <text x="100" y="310" text-anchor="middle" font-size="18" fill="#0066ff">✓</text>
+                            <text x="310" y="330" text-anchor="middle" font-size="20" fill="#0066ff">⭐</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                        <div class="stat-number">175,324</div>
+                        <div class="stat-label">Active Jobs</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-building"></i></div>
+                        <div class="stat-number">97,354</div>
+                        <div class="stat-label">Companies</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-number">38,47,154</div>
+                        <div class="stat-label">Job Seekers</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-star"></i></div>
+                        <div class="stat-number">7,532</div>
+                        <div class="stat-label">Placements</div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-5">
+    <section class="features" id="features">
         <div class="container">
-            <h2 class="text-center section-title">Powerful Features</h2>
+            <div class="section-title">
+                <h2>Our Powerful Features</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-microphone-alt"></i></div>
+                        <div class="feature-name">AI Voice Interviews</div>
+                        <div class="feature-description">Experience interactive voice-based interviews powered by
+                            advanced AI technology for a natural conversation experience.</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
+                        <div class="feature-name">Resume Matching</div>
+                        <div class="feature-description">Get instant feedback on how well your resume matches job
+                            requirements with our intelligent matching algorithm.</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-check-double"></i></div>
+                        <div class="feature-name">Smart Shortlisting</div>
+                        <div class="feature-description">Recruiters can efficiently shortlist candidates using
+                            AI-powered insights and candidate performance metrics.</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="feature-name">Interview Invitations</div>
+                        <div class="feature-description">Receive personalized interview invitations via email after
+                            successful shortlisting by recruiters.</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                        <div class="feature-name">AI Assessment</div>
+                        <div class="feature-description">Get comprehensive AI-based assessment reports that evaluate
+                            your interview performance and provide insights.</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-globe"></i></div>
+                        <div class="feature-name">Public Interviews</div>
+                        <div class="feature-description">Practice with public interviews available to all users and
+                            improve your interview skills anytime.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Public Interviews Section -->
+    <section class="public-interviews" id="interviews">
+        <div class="container">
+            <div class="section-title">
+                <h2>Available Public Interviews</h2>
+            </div>
+
             <div class="row g-4">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-robot"></i>
+                {% if public_interviews %}
+                {% for interview in public_interviews %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card interview-card h-100">
+                        {% if interview.status %}
+                        <div class="interview-badge">Active</div>
+                        {% else %}
+                        <div class="interview-badge" style="background: #6c757d;">Closed</div>
+                        {% endif %}
+                        <div class="card-body p-4">
+                            <h5 class="card-title">{{ interview.title }}</h5>
+                            <p class="text-muted mb-2">Role: {{ interview.role or "Not specified" }}</p>
+                            <p class="card-text">{{ interview.description}}</p>
+
+                            {% if interview.skills %}
+                            <div class="mb-3">
+                                <small class="text-muted">Skills assessed:</small>
+                                <div class="mt-1">
+                                    {% for skill in interview.skills[:4] %}
+                                    <span class="skills-tag">{{ skill }}</span>
+                                    {% endfor %}
+                                    {% if interview.skills|length > 4 %}
+                                    <span class="skills-tag">+{{ interview.skills|length - 4 }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class=" mt-3">
+                                <p class="text-muted">
+                                    <i class="far fa-calendar me-1"></i>
+                                    {{ interview.created_at.strftime('%b %d, %Y') }}
+                                </p>
+                                {% if interview.status %}
+                                <a href="{{ url_for('public_interview_detail', interview_id=interview.id) }}"
+                                    class="btn btn-attempt">
+                                    Attempt Interview
+                                </a>
+                                {% else %}
+                                <button class="btn btn-attempt" disabled>
+                                    Interview Closed
+                                </button>
+                                {% endif %}
+                            </div>
                         </div>
-                        <h4 class="text-center">AI-Powered Interviews</h4>
-                        <p class="text-center">Conduct automated interviews with AI that analyzes responses, tone, and body language.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-cloud-download-alt"></i>
-                        </div>
-                        <h4 class="text-center">LinkedIn Job Scraping</h4>
-                        <p class="text-center">Automatically import job postings from LinkedIn with our powerful scraping tool.</p>
-                    </div>
+                {% endfor %}
+                {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No public interviews available at the moment. Check back soon!</p>
                 </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-video"></i>
-                        </div>
-                        <h4 class="text-center">Video & Voice Interviews</h4>
-                        <p class="text-center">Conduct interviews with integrated video and voice capabilities, all within the platform.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <h4 class="text-center">Resume Analysis</h4>
-                        <p class="text-center">AI-powered resume screening that identifies the best candidates based on job requirements.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-bullhorn"></i>
-                        </div>
-                        <h4 class="text-center">Public Interviews</h4>
-                        <p class="text-center">Create public interviews with predefined questions to reach a wider candidate pool.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card feature-card p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <h4 class="text-center">Automated Communication</h4>
-                        <p class="text-center">Send interview invitations and follow-ups automatically through our email system.</p>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </section>
 
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="py-5 bg-light">
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose-us" id="why">
         <div class="container">
-            <h2 class="text-center section-title">How It Works</h2>
+            <h2 class="section-title" style="margin-bottom: 3rem;">Why Choose JobHub?</h2>
             <div class="row">
-                <div class="col-lg-10 mx-auto">
-                    <div class="row">
-                        <div class="col-md-4 process-step">
-                            <div class="step-number">1</div>
-                            <h4 class="text-center">Scrape Jobs</h4>
-                            <p class="text-center">Recruiters import job postings from LinkedIn with our scraping tool.</p>
+                <div class="col-lg-6">
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-robot"></i></div>
+                        <div class="advantage-content">
+                            <h4>AI-Powered Matching</h4>
+                            <p>Our advanced AI algorithms match your skills and experience with the most suitable job
+                                opportunities, saving you time and effort.</p>
                         </div>
-                        <div class="col-md-4 process-step">
-                            <div class="step-number">2</div>
-                            <h4 class="text-center">Apply & Screen</h4>
-                            <p class="text-center">Job seekers apply, and AI screens resumes to identify top candidates.</p>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="advantage-content">
+                            <h4>Secure & Transparent</h4>
+                            <p>Your data is protected with enterprise-grade security. Complete transparency in the
+                                hiring process from application to placement.</p>
                         </div>
-                        <div class="col-md-4 process-step">
-                            <div class="step-number">3</div>
-                            <h4 class="text-center">AI Interviews</h4>
-                            <p class="text-center">Conduct AI-powered interviews with voice, video, and predefined questions.</p>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="advantage-content">
+                            <h4>Career Growth</h4>
+                            <p>Access resources, practice interviews, and get personalized feedback to accelerate your
+                                career growth and development.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-headset"></i></div>
+                        <div class="advantage-content">
+                            <h4>24/7 Support</h4>
+                            <p>Our dedicated support team is available round the clock to assist you with any questions
+                                or concerns throughout your journey.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-users"></i></div>
+                        <div class="advantage-content">
+                            <h4>Community Driven</h4>
+                            <p>Join a thriving community of job seekers and professionals. Network, share experiences,
+                                and grow together.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-item">
+                        <div class="advantage-icon"><i class="fas fa-lightning-bolt"></i></div>
+                        <div class="advantage-content">
+                            <h4>Quick Placements</h4>
+                            <p>Our streamlined process ensures faster hiring cycles. Many candidates get placed within
+                                weeks of joining our platform.</p>
                         </div>
                     </div>
                 </div>
@@ -368,57 +931,16 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-5">
+    <!-- Join Us Section -->
+    <section class="join-us">
         <div class="container">
-            <h2 class="text-center section-title">What Our Users Say</h2>
-            <div class="row">
-                <div class="col-lg-4 col-md-6">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/70" alt="Sarah Johnson" class="testimonial-img">
-                            <div>
-                                <h5 class="mb-0">Sarah Johnson</h5>
-                                <p class="text-muted mb-0">HR Manager</p>
-                            </div>
-                        </div>
-                        <p class="mb-0">"JobConnect AI has revolutionized our hiring process. The LinkedIn scraping feature saves us hours, and the AI interviews help us identify the best candidates quickly."</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/70" alt="Michael Chen" class="testimonial-img">
-                            <div>
-                                <h5 class="mb-0">Michael Chen</h5>
-                                <p class="text-muted mb-0">Tech Recruiter</p>
-                            </div>
-                        </div>
-                        <p class="mb-0">"The public interview feature is a game-changer. We can now reach more candidates and the predefined questions ensure we're assessing the right skills."</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/70" alt="Emily Rodriguez" class="testimonial-img">
-                            <div>
-                                <h5 class="mb-0">Emily Rodriguez</h5>
-                                <p class="text-muted mb-0">Job Seeker</p>
-                            </div>
-                        </div>
-                        <p class="mb-0">"The AI interview process was smooth and professional. I appreciated the video and voice features that made it feel like a real conversation."</p>
-                    </div>
-                </div>
+            <h2>Ready to Transform Your Career?</h2>
+            <p>Join thousands of job seekers who have found their dream jobs through JobHub's AI-powered platform.</p>
+            <div class="join-buttons">
+                <!-- Added Jinja templating for join us buttons -->
+                <a href="{{ url_for('get_register') }}" class="btn-join-primary">Sign Up as Job Seeker</a>
+                <a href="{{ url_for('get_register') }}" class="btn-join-secondary">Register as Recruiter</a>
             </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container text-center">
-            <h2 class="mb-4">Ready to Transform Your Hiring Process?</h2>
-            <p class="lead mb-4">Join thousands of companies using JobConnect AI to find the perfect candidates.</p>
-            <a href="{{url_for('get_login')}}" class="btn btn-light btn-lg">Start Free Trial</a>
         </div>
     </section>
 
@@ -426,52 +948,45 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col-lg-4 mb-4">
-                    <h4 class="mb-4">
-                        <i class="fas fa-handshake me-2"></i>JobConnect AI
-                    </h4>
-                    <p>Revolutionizing recruitment with AI-powered tools for recruiters and job seekers.</p>
-                    <div class="social-icons mt-4">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
+                <div class="col-md-3 footer-section">
+                    <h5><i class="fas fa-briefcase"></i> JobHub</h5>
+                    <p style="color: #999; font-size: 0.9rem;">Your AI-powered gateway to career opportunities</p>
                 </div>
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h5 class="mb-4">Quick Links</h5>
-                    <div class="footer-links d-flex flex-column">
-                        <a href="#" class="mb-2">Home</a>
-                        <a href="#features" class="mb-2">Features</a>
-                        <a href="#how-it-works" class="mb-2">How It Works</a>
-                        <a href="#testimonials" class="mb-2">Testimonials</a>
-                    </div>
+                <div class="col-md-3 footer-section">
+                    <h5>For Job Seekers</h5>
+                    <ul>
+                        <li><a href="#">Browse Jobs</a></li>
+                        <li><a href="#">Practice Interviews</a></li>
+                        <li><a href="#">Resume Check</a></li>
+                        <li><a href="#">Career Tips</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h5 class="mb-4">Company</h5>
-                    <div class="footer-links d-flex flex-column">
-                        <a href="#" class="mb-2">About Us</a>
-                        <a href="#" class="mb-2">Careers</a>
-                        <a href="#" class="mb-2">Contact</a>
-                        <a href="#" class="mb-2">Blog</a>
-                    </div>
+                <div class="col-md-3 footer-section">
+                    <h5>For Recruiters</h5>
+                    <ul>
+                        <li><a href="#">Post a Job</a></li>
+                        <li><a href="#">Find Candidates</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">About Us</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-4 mb-4">
-                    <h5 class="mb-4">Subscribe to Our Newsletter</h5>
-                    <p>Stay updated with the latest features and news.</p>
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Your email address">
-                        <button class="btn btn-primary" type="button">Subscribe</button>
-                    </div>
+                <div class="col-md-3 footer-section">
+                    <h5>Follow Us</h5>
+                    <ul>
+                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                        <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                    </ul>
                 </div>
             </div>
-            <div class="copyright text-center">
-                <p class="mb-0">&copy; 2023 JobConnect AI. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JobHub. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

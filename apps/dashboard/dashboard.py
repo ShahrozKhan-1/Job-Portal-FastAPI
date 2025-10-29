@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends, Form, UploadFile, File
 from fastapi.responses import JSONResponse, RedirectResponse
 from apps.auth.utils import get_current_user
-from database.models import Job, Applicant, User, SaveJob, Interview
+from database.models import Job, Applicant, User, SaveJob, Interview, PublicInterview
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.schema import JobResponse, JobCreate, ApplicantResponse, JobEdit, UpdateUser, SaveJobResponse
@@ -30,8 +30,9 @@ dashboard_router = APIRouter()
 
 
 @dashboard_router.get("/")
-async def landing_page(request:Request):
-    return templates.TemplateResponse("landingpage.html", {"request":request})
+async def landing_page(request:Request, db:Session=Depends(get_db)):
+    interview = db.query(PublicInterview).order_by(PublicInterview.created_at.desc()).all()
+    return templates.TemplateResponse("landingpage.html", {"request":request, "public_interviews":interview})
 
 
 @dashboard_router.get("/dashboard", response_model=list[JobResponse])
@@ -406,7 +407,7 @@ async def send_email(recipient_email: str, status: str, interview_time: datetime
                 <p>Dear Applicant,</p>
                 <p>🎉 Congratulations! Your application has been 
                 <strong style="color: green;">Accepted</strong>.</p>
-                {interview_info}
+                <p><strong>Interview Scheduled:</strong> {interview_time.strftime('%A, %d %B %Y at %I:%M %p')}</p>
                 <p>Our team will reach out soon with the next steps.</p>
                 <p>Best regards,<br><strong>Your HR Team</strong></p>
             </body>

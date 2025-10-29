@@ -92,25 +92,6 @@ body {
     color: #6b7280;
 }
 
-.social-btn {
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 10px;
-    transition: all 0.3s ease;
-}
-
-.social-btn:hover {
-    border-color: #3b82f6;
-    background: #f8fafc;
-}
-
-.login-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-}
-
 .login-link a {
     color: #3b82f6;
     text-decoration: none;
